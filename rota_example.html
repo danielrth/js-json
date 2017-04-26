@@ -1,0 +1,119 @@
+
+<!doctype html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Bar mode</title>
+
+	<script src='../../../codebase/dhtmlxscheduler.js' type="text/javascript" charset="utf-8"></script>
+	<script src='../../../codebase/ext/dhtmlxscheduler_timeline.js' type="text/javascript" charset="utf-8"></script>
+	<script src='../../../codebase/ext/dhtmlxscheduler_treetimeline.js' type="text/javascript" charset="utf-8"></script>
+	
+	<link rel='stylesheet' type='text/css' href='../../../codebase/dhtmlxscheduler.css'>
+	
+	<style type="text/css" >
+		html, body{
+			margin:0;
+			padding:0;
+			height:100%;
+			overflow:hidden;
+		}
+		.dhx_section_time select:nth-child(2),select:nth-child(3),select:nth-child(4),select:nth-child(7),select:nth-child(8),select:nth-child(9) {
+			display: none;
+		}
+		.one_line{
+			white-space:nowrap;
+			overflow:hidden;
+			padding-top:5px; padding-left:5px;
+			text-align:left !important;
+		}
+
+	</style>
+
+	<script type="text/javascript" charset="utf-8">
+		function init() {
+
+			//===============
+			//Configuration
+			//===============
+			scheduler.locale.labels.timeline_tab = "Timeline";
+			scheduler.locale.labels.section_custom="Section";
+			scheduler.config.details_on_create=true;
+			scheduler.config.details_on_dblclick=true;
+			scheduler.config.time_step = 30;
+			scheduler.config.auto_end_date = true;
+			scheduler.config.multi_day = false;
+
+			var sections=[
+				{key:1, label:"Sales Assistant"},
+				{key:2, label:"Tech Support"}
+			];
+
+			scheduler.createTimelineView({
+				name:	"timeline",
+				x_unit:	"day",
+				x_date:	"%j %D",
+				x_step:	1,
+				x_size: 7,
+				x_start: 0,
+				x_length: 7,
+				y_unit:	[ // original hierarhical array to display
+					{key:10, label:"Web Testing Dep.", open: true, children: [
+						{key:20, label:"Elizabeth Taylor"},
+						{key:30, label:"Managers",  children: [
+							{key:40, label:"John Williams"},
+							{key:50, label:"David Miller"}
+						]},
+						{key:60, label:"Linda Brown"},
+						{key:70, label:"George Lucas"}
+					]},
+					{key:110, label:"Human Relations Dep.", open:true, children: [
+						{key:80, label:"Kate Moss"},
+						{key:90, label:"Dian Fossey"}
+					]}
+				],
+				y_property:	"section_id",
+				round_position: true,
+				section_autoheight: false,
+				render:"tree",
+				folder_dy:20,
+				dy:60
+
+			});
+
+			scheduler.locale.labels.section_checkme = "Publish and send notification?";  
+			scheduler.config.lightbox.sections=[
+				{name:"time", height:72, type:"time", map_to:"auto", time_format:["%H:%i", "%m", "%d", "%Y"] },
+				{name:"custom", height:23, type:"select", options:sections, map_to:"section_id"},
+				{name:"description", height:100, map_to:"text", type:"textarea" , focus:true},
+				{ name:"checkme", map_to:"single_checkbox", type:"checkbox", checked_value: "registrable", unchecked_value: "unchecked", height:40 }
+			];
+
+			function getMonday(d) {
+			  d = new Date(d);
+			  var day = d.getDay(),
+			      diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+			  return new Date(d.setDate(diff));
+			}
+
+			scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
+		}
+	</script>
+</head>
+<body onload="init();">
+	<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
+		<div class="dhx_cal_navline">
+			<div class="dhx_cal_prev_button">&nbsp;</div>
+			<div class="dhx_cal_next_button">&nbsp;</div>
+			<div class="dhx_cal_today_button"></div>
+			<div class="dhx_cal_date"></div>
+			<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
+			<div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
+			<div class="dhx_cal_tab" name="timeline_tab" style="right:280px;"></div>
+			<div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+		</div>
+		<div class="dhx_cal_header">
+		</div>
+		<div class="dhx_cal_data">
+		</div>		
+	</div>
+</body>
