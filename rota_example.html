@@ -2,103 +2,111 @@
 <!doctype html>
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-	<title>Bar mode</title>
-
+	<title>Tree mode</title>
+	
+	
 	<script src='../../../codebase/dhtmlxscheduler.js' type="text/javascript" charset="utf-8"></script>
 	<script src='../../../codebase/ext/dhtmlxscheduler_timeline.js' type="text/javascript" charset="utf-8"></script>
 	<script src='../../../codebase/ext/dhtmlxscheduler_treetimeline.js' type="text/javascript" charset="utf-8"></script>
 	
 	<link rel='stylesheet' type='text/css' href='../../../codebase/dhtmlxscheduler.css'>
 	
-	<style type="text/css" >
-		html, body{
-			margin:0;
-			padding:0;
-			height:100%;
-			overflow:hidden;
-		}
-		.dhx_section_time select:nth-child(2),select:nth-child(3),select:nth-child(4),select:nth-child(7),select:nth-child(8),select:nth-child(9) {
-			display: none;
-		}
-		.one_line{
-			white-space:nowrap;
-			overflow:hidden;
-			padding-top:5px; padding-left:5px;
-			text-align:left !important;
-		}
-
-	</style>
-
-	<script type="text/javascript" charset="utf-8">
-		function init() {
-
-			//===============
-			//Configuration
-			//===============
-			scheduler.locale.labels.timeline_tab = "Timeline";
-			scheduler.locale.labels.section_custom="Section";
-			scheduler.config.details_on_create=true;
-			scheduler.config.details_on_dblclick=true;
-			scheduler.config.time_step = 30;
-			scheduler.config.auto_end_date = true;
-			scheduler.config.multi_day = false;
-
-			var sections=[
-				{key:1, label:"Sales Assistant"},
-				{key:2, label:"Tech Support"}
-			];
-
-			scheduler.createTimelineView({
-				name:	"timeline",
-				x_unit:	"day",
-				x_date:	"%j %D",
-				x_step:	1,
-				x_size: 7,
-				x_start: 0,
-				x_length: 7,
-				y_unit:	[ // original hierarhical array to display
-					{key:10, label:"Web Testing Dep.", open: true, children: [
-						{key:20, label:"Elizabeth Taylor"},
-						{key:30, label:"Managers",  children: [
-							{key:40, label:"John Williams"},
-							{key:50, label:"David Miller"}
-						]},
-						{key:60, label:"Linda Brown"},
-						{key:70, label:"George Lucas"}
-					]},
-					{key:110, label:"Human Relations Dep.", open:true, children: [
-						{key:80, label:"Kate Moss"},
-						{key:90, label:"Dian Fossey"}
-					]}
-				],
-				y_property:	"section_id",
-				round_position: true,
-				section_autoheight: false,
-				render:"tree",
-				folder_dy:20,
-				dy:60
-
-			});
-
-			scheduler.locale.labels.section_checkme = "Publish and send notification?";  
-			scheduler.config.lightbox.sections=[
-				{name:"time", height:72, type:"time", map_to:"auto", time_format:["%H:%i", "%m", "%d", "%Y"] },
-				{name:"custom", height:23, type:"select", options:sections, map_to:"section_id"},
-				{name:"description", height:100, map_to:"text", type:"textarea" , focus:true},
-				{ name:"checkme", map_to:"single_checkbox", type:"checkbox", checked_value: "registrable", unchecked_value: "unchecked", height:40 }
-			];
-
-			function getMonday(d) {
-			  d = new Date(d);
-			  var day = d.getDay(),
-			      diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
-			  return new Date(d.setDate(diff));
-			}
-
-			scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
-		}
-	</script>
 </head>
+
+	
+<style type="text/css" >
+	html, body{
+		margin:0px;
+		padding:0px;
+		height:100%;
+		overflow:hidden;
+	}	
+	.one_line{
+		white-space:nowrap;
+		overflow:hidden;
+		padding-top:5px; padding-left:5px;
+		text-align:left !important;
+	}
+</style>
+
+<script type="text/javascript" charset="utf-8">
+	function getMonday(d) {
+	  d = new Date(d);
+	  var day = d.getDay(),
+	      diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+	  return new Date(d.setDate(diff));
+	}
+
+	function init() {
+
+		scheduler.locale.labels.timeline_tab = "Timeline";
+		scheduler.locale.labels.section_custom="Section";
+		scheduler.config.time_step = 30;
+		scheduler.config.details_on_create=true;
+		scheduler.config.details_on_dblclick=true;
+		scheduler.config.xml_date="%Y-%m-%d %H:%i";
+		
+		
+		//===============
+		//Configuration
+		//===============	
+		
+		var elements = [ // original hierarhical array to display
+			{key:1, label:"Open Shifts"},
+			{key:10, label:"Sales Assistant", open: true, children: [
+				{key:20, label:"Elizabeth Taylor"},
+				{key:30, label:"Linda Brown"},
+				{key:70, label:"George Lucas"}
+			]},
+			{key:110, label:"Tech Support", open:true, children: [
+				{key:80, label:"Kate Moss"},
+				{key:90, label:"Dian Fossey"}
+			]}
+		];
+		
+		
+		
+		scheduler.createTimelineView({
+			section_autoheight: false,
+			name:	"timeline",
+			x_unit:	"day",
+			x_date:	"%j %D",
+			x_step:	1,
+			x_size: 7,
+			y_unit: elements,
+			y_property:	"section_id",
+			round_position: true,
+			render: "tree",
+			folder_dy:20,
+			dy:60
+		});
+		
+		
+		
+
+		//===============
+		//Data loading
+		//===============
+		scheduler.config.lightbox.sections=[	
+			{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
+			{name:"custom", height:23, type:"timeline", options:null , map_to:"section_id" }, //type should be the same as name of the tab
+			{name:"time", height:72, type:"time", map_to:"auto"}
+		]
+		
+		scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
+		scheduler.parse([
+			{ start_date: "2017-04-24 09:00", end_date: "2017-04-25 12:00", text:"Task A-12458", section_id:1},
+			{ start_date: "2017-04-29 09:00", end_date: "2017-04-30 12:00", text:"Task A-12458", section_id:1},
+			{ start_date: "2017-04-25 09:00", end_date: "2017-04-25 12:00", text:"Task A-12458", section_id:20},
+			{ start_date: "2017-04-26 10:00", end_date: "2017-04-26 16:00", text:"Task A-89411", section_id:30},
+			{ start_date: "2017-04-27 10:00", end_date: "2017-04-27 14:00", text:"Task A-64168", section_id:80},
+			{ start_date: "2017-04-28 16:00", end_date: "2017-04-28 17:00", text:"Task A-46598", section_id:90}
+		],"json");
+		
+	}
+	
+</script>
+
 <body onload="init();">
 	<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		<div class="dhx_cal_navline">
