@@ -8,7 +8,7 @@
 	<script src='../../../codebase/dhtmlxscheduler.js' type="text/javascript" charset="utf-8"></script>
 	<script src='../../../codebase/ext/dhtmlxscheduler_timeline.js' type="text/javascript" charset="utf-8"></script>
 	<script src='../../../codebase/ext/dhtmlxscheduler_treetimeline.js' type="text/javascript" charset="utf-8"></script>
-	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 	<link rel='stylesheet' type='text/css' href='../../../codebase/dhtmlxscheduler.css'>
 	
 </head>
@@ -27,9 +27,88 @@
 		padding-top:5px; padding-left:5px;
 		text-align:left !important;
 	}
+	.dhx_cal_event_line{
+		height: 54px !important;
+		border-radius: 0;
+	    background-color: #bbb;
+	    border: #888 solid 1px;
+	}
+	.dhx_event_resize{
+		height: 54px !important;
+	}
+	.dhx_section_time select:nth-child(4),select:nth-child(9) {
+		display: none;
+	}
 </style>
 
 <script type="text/javascript" charset="utf-8">
+	$(document).ready(function(){
+	    var allData;
+		var locations=null, roles=null, employees=null, shifts=null;
+		$.ajax({
+		  	url: "rota_data.json",
+		  	type: 'GET'
+		})
+		.done(function(data) {
+			allData = JSON.parse(data);
+			locations = allData.locations;
+			roles = allData.roles;
+			employees = allData.employees;
+			shifts = allData.shifts;
+			var units = getUnits(roles, employees);
+			console.log(units);
+			var shiftSlots = getShiftSlots(roles, employees, shifts);
+			console.log(shiftSlots);
+			init(units, shiftSlots);
+		})
+		.fail(function(error) {
+			console.log(error);
+		});
+
+		$('button').click(function(){
+			locations = allData.locations;
+			roles = allData.roles;
+			employees = allData.employees;
+			shifts = allData.shifts;
+			console.log(getUnits(roles, employees));
+		});
+
+		function getUnits(roles, employees) {
+			var unitOpenShift = {key: 100000, label: "Open Shifts"};
+			var units = [unitOpenShift];
+			for (var i = 0; i < roles.length; i++) {
+				var unit = {key: i+1, label: roles[i]['name'], open: true, children: []};
+				units.push(unit);
+			}
+
+			for (var i = 0; i < employees.length; i++) {
+				var defaultRole = employees[i]['defaultrole'];
+				var unit = {key: generateSectionID(defaultRole, i), label: employees[i]['name']};
+				units[defaultRole + 1]['children'].push(unit);
+			}
+			return units;
+		}
+
+		function getShiftSlots(roles, employees, shifts) {
+			var shiftSlots = [];
+			for (var i = 0; i < shifts.length; i++) {
+				var sectionId = 100000;
+				var color = "lightgray";
+				if (shifts[i]['employee'] >= 0) {
+					sectionId = generateSectionID( employees[shifts[i]['employee']]['defaultrole'], shifts[i]['employee'] );
+					color = roles[employees[shifts[i]['employee']]['defaultrole']]['color'];
+				}
+				var shiftSlot = {start_date: shifts[i]['start_date'], end_date: shifts[i]['end_date'], text: shifts[i]['task'], section_id: sectionId, color: color, break: shifts[i]['break']}
+				shiftSlots.push(shiftSlot);
+			}
+			return shiftSlots;
+		}
+
+		function generateSectionID(roleId, employeeId) {
+			return (roleId + 1) * 100000 + employeeId + 1;
+		}
+	});
+	
 	function getMonday(d) {
 	  d = new Date(d);
 	  var day = d.getDay(),
@@ -37,11 +116,11 @@
 	  return new Date(d.setDate(diff));
 	}
 
-	function init() {
+	function init(units, slots) {
 
 		scheduler.locale.labels.timeline_tab = "Timeline";
 		scheduler.locale.labels.section_custom="Section";
-		scheduler.config.time_step = 30;
+		scheduler.config.time_step = 15;
 		scheduler.config.details_on_create=true;
 		scheduler.config.details_on_dblclick=true;
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
@@ -50,22 +129,12 @@
 		//===============
 		//Configuration
 		//===============	
-		
-		var elements = [ // original hierarhical array to display
-			{key:1, label:"Open Shifts"},
-			{key:10, label:"Sales Assistant", open: true, children: [
-				{key:20, label:"Elizabeth Taylor"},
-				{key:30, label:"Linda Brown"},
-				{key:70, label:"George Lucas"}
-			]},
-			{key:110, label:"Tech Support", open:true, children: [
-				{key:80, label:"Kate Moss"},
-				{key:90, label:"Dian Fossey"}
-			]}
-		];
-		
-		
-		
+		var format = scheduler.date.date_to_str("%H:%i");
+		scheduler.templates.event_bar_text = function(sd, ed, ev){
+			// console.log(ev);
+			return format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + ev.break + " min break)";
+		}
+
 		scheduler.createTimelineView({
 			section_autoheight: false,
 			name:	"timeline",
@@ -73,7 +142,7 @@
 			x_date:	"%j %D",
 			x_step:	1,
 			x_size: 7,
-			y_unit: elements,
+			y_unit: units,
 			y_property:	"section_id",
 			round_position: true,
 			render: "tree",
@@ -81,33 +150,45 @@
 			dy:60
 		});
 		
-		
-		
-
+		scheduler.form_blocks["break"] = {
+            render: function (sns) {
+                return "<div class='dhx_cal_block'><input type='number' min='10'/></div>";
+            },
+            set_value: function (node, value, ev) {
+                node.firstChild.value = value || "";
+            },
+            get_value: function (node, ev) {
+                return node.firstChild.value;
+            },
+            focus: function (node) {
+                var a = node; scheduler._focus(a, true);
+            }
+        };
 		//===============
 		//Data loading
 		//===============
 		scheduler.config.lightbox.sections=[	
 			{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
 			{name:"custom", height:23, type:"timeline", options:null , map_to:"section_id" }, //type should be the same as name of the tab
-			{name:"time", height:72, type:"time", map_to:"auto"}
+			{name:"time", height:72, type:"time", map_to:"auto"},
+			{name:"break", height:60, type:"break", map_to:"auto" },
 		]
 		
 		scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
-		scheduler.parse([
-			{ start_date: "2017-04-24 09:00", end_date: "2017-04-25 12:00", text:"Task A-12458", section_id:1},
-			{ start_date: "2017-04-29 09:00", end_date: "2017-04-30 12:00", text:"Task A-12458", section_id:1},
-			{ start_date: "2017-04-25 09:00", end_date: "2017-04-25 12:00", text:"Task A-12458", section_id:20},
-			{ start_date: "2017-04-26 10:00", end_date: "2017-04-26 16:00", text:"Task A-89411", section_id:30},
-			{ start_date: "2017-04-27 10:00", end_date: "2017-04-27 14:00", text:"Task A-64168", section_id:80},
-			{ start_date: "2017-04-28 16:00", end_date: "2017-04-28 17:00", text:"Task A-46598", section_id:90}
-		],"json");
+		scheduler.parse(slots,"json");
 		
+		scheduler.attachEvent("onBeforeLightbox", function(id){
+			// $(".dhx_cal_larea .dhx_wrap_section:eq(2)").append("<div>LLLLLLLLL</div>");
+			// var ev = scheduler.getEvent(id);
+			// console.log(scheduler.formSection('time'));
+			// });
+			return true;
+		});
 	}
 	
 </script>
 
-<body onload="init();">
+<body>
 	<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		<div class="dhx_cal_navline">
 			<div class="dhx_cal_prev_button">&nbsp;</div>

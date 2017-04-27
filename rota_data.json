@@ -1,0 +1,29 @@
+{
+	"locations": ["Office", "Shop Floor", "Home"],
+	"roles": [
+		{"name": "Management", "color": "gray"},
+		{"name": "Sales Assistant", "color":"yellow"},
+		{"name": "Tech Support", "color": "blue"},
+		{"name": "Software Dev", "color": "green"}
+	],
+	"employees": [
+		{"name": "Linda Brown", "defaultrole": 0, "otherroles": [1,2], "locations": [0,1]},
+		{"name": "George Lucus", "defaultrole": 1, "otherroles": [2], "locations": [0,1,2]},
+		{"name": "Kate Moss", "defaultrole": 2, "otherroles": [1], "locations": [0]},
+		{"name": "Dian Fossy", "defaultrole": 3, "otherroles": [], "locations": [0,2]},
+		{"name": "Barry William", "defaultrole": 2, "otherroles": [], "locations": [1]},
+		{"name": "Daniel Roth", "defaultrole": 3, "otherroles": [2], "locations": [2]}
+	],
+	"shifts": [
+		{ "employee": -1, "task": "Task 111", "start_date": "2017-04-25 09:00", "end_date": "2017-04-27 14:00", "break": 300 },
+		{ "employee": 0, "task": "Task A-12458", "start_date": "2017-04-25 09:00", "end_date": "2017-04-25 14:00", "break": 30 },
+		{ "employee": 1, "task": "Task B-45754", "start_date": "2017-04-27 10:00", "end_date": "2017-04-27 14:00", "break": 20 },
+		{ "employee": 2, "task": "Task A-357", "start_date": "2017-04-28 09:30", "end_date": "2017-04-28 12:00", "break": 0 },
+		{ "employee": 3, "task": "Task C-68", "start_date": "2017-04-24 13:00", "end_date": "2017-04-24 15:00", "break": 10 },
+		{ "employee": 4, "task": "Task D-25", "start_date": "2017-04-25 08:00", "end_date": "2017-04-25 11:30", "break": 60 },
+		{ "employee": 5, "task": "Task E-568", "start_date": "2017-04-26 14:00", "end_date": "2017-04-26 18:00", "break": 0 },
+		{ "employee": 3, "task": "Task F-35687", "start_date": "2017-04-26 13:00", "end_date": "2017-04-26 15:00", "break": 18 },
+		{ "employee": 5, "task": "Task G-365", "start_date": "2017-04-25 14:00", "end_date": "2017-04-25 18:00", "break": 15 },
+		{ "employee": 1, "task": "Task H-8446", "start_date": "2017-04-29 16:00", "end_date": "2017-04-29 20:00", "break": 50 }
+	]
+}
