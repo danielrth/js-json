@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
@@ -8,8 +9,12 @@
 	<script src='../../../codebase/dhtmlxscheduler.js' type="text/javascript" charset="utf-8"></script>
 	<script src='../../../codebase/ext/dhtmlxscheduler_timeline.js' type="text/javascript" charset="utf-8"></script>
 	<script src='../../../codebase/ext/dhtmlxscheduler_treetimeline.js' type="text/javascript" charset="utf-8"></script>
+
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 	<link rel='stylesheet' type='text/css' href='../../../codebase/dhtmlxscheduler.css'>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	
 </head>
 
@@ -36,20 +41,117 @@
 	.dhx_event_resize{
 		height: 54px !important;
 	}
-	.dhx_section_time select:nth-child(4),select:nth-child(9) {
-		display: none;
-	}
-	#btn-save {
+	#shift_form {
 		position: absolute;
-		top: 14px;
-		right: 240px;
-		width: 70px;
-		height: 30px;
+		top: 100px;
+		left: 200px;
+		z-index: 10001;
+		display: none;
+		background-color: white;
+		border: 2px solid teal;
+		padding: 20px;
+		font-family: Tahoma;
+		font-size: 10pt;
+		border-radius: 10px;
+	}
+	#shift_form label {
+		color: gray;
 	}
 </style>
 
 <script type="text/javascript" charset="utf-8">
+	function getMonday(d) {
+	  d = new Date(d);
+	  var day = d.getDay(),
+	      diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+	  return new Date(d.setDate(diff));
+	}
+
+	function init(units, slots) {
+
+		scheduler.locale.labels.timeline_tab = "Timeline";
+		scheduler.locale.labels.section_custom="Section";
+		scheduler.config.details_on_create=true;
+		scheduler.config.details_on_dblclick=true;
+		scheduler.config.xml_date="%Y-%m-%d %H:%i";
+		
+		
+		//===============
+		//Configuration
+		//===============	
+
+		scheduler.createTimelineView({
+			section_autoheight: false,
+			name:	"timeline",
+			x_unit:	"day",
+			x_date:	"%j %D",
+			x_step:	1,
+			x_size: 7,
+			y_unit: units,
+			y_property:	"section_id",
+			round_position: true,
+			render: "tree",
+			folder_dy:20,
+			dy:60
+		});
+		
+		//===============
+		//Data loading
+		//===============
+		scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
+		
+		scheduler.parse(slots,"json");
+	}
+
+	var format = scheduler.date.date_to_str("%H:%i");
+	scheduler.templates.event_bar_text = function(sd, ed, ev){
+		// console.log(ev);
+		return format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + ev.break + " min break)";
+	}
+			
+	scheduler.showLightbox = function(id) {
+		var ev = scheduler.getEvent(id);
+		scheduler.startLightbox(id, document.getElementById("shift_form"));
+
+		$("#description").val( ev.text );
+		$("#break").val( ev.break || "" );
+		console.log(ev.start_date);
+		console.log(ev.end_date);
+		$("#sel_start_time").val( ev.start_date.getHours() );
+		$("#sel_end_time").val( ev.end_date.getHours() );
+	};
+
+	function save_form() {
+		var ev = scheduler.getEvent(scheduler.getState().lightbox_id);
+		ev.text = $("#description").val();
+		ev.break = $("#break").val();
+
+		ev.end_date.setDate(ev.start_date.getDate());
+		ev.start_date.setHours($("#sel_start_time").val());
+		ev.end_date.setHours($("#sel_end_time").val());
+		console.log(ev.start_date);
+		console.log(ev.end_date);
+
+		scheduler.endLightbox(true, document.getElementById("shift_form"));
+	}
+	function close_form() {
+		scheduler.endLightbox(false, document.getElementById("shift_form"));
+	}
+
+	function delete_event() {
+		var event_id = scheduler.getState().lightbox_id;
+		scheduler.endLightbox(false, document.getElementById("shift_form"));
+		scheduler.deleteEvent(event_id);
+	}
+
 	$(document).ready(function(){
+		for (var i = 0; i < 24; i++) {
+			var text = i % 12 + (i < 12 ? " am" : " pm");
+			if (i == 12) text = "12 pm"
+			$("#sel_start_time").append(new Option( text, i));
+			$("#sel_end_time").append(new Option( text, i));
+		}
+
 		var EmployeeLimit = 100000;
 	    var allData;
 		var locations=null, roles=null, employees=null, shifts=null;
@@ -74,18 +176,8 @@
 		});
 
 		$('button').click(function(){
-			// locations = allData.locations;
-			// roles = allData.roles;
-			// employees = allData.employees;
-			// shifts = allData.shifts;
-			// console.log(getUnits(roles, employees));
-			var evs = scheduler.getEvents(new Date(2017,4,24),new Date(2017,4,30)); 
-			for (var i=0; i<evs.length; i++){
-			       alert(evs[i].text);
-			}
-			// or
-			var evs = scheduler.getEvents();// will return all events
-			console.log(evs);
+			// var evs = scheduler.getEvents(new Date(2017,4,24),new Date(2017,4,30)); 
+			// console.log(evs);
 		});
 
 		function getUnits(roles, employees) {
@@ -123,90 +215,54 @@
 			return (roleId + 1) * EmployeeLimit + employeeId + 1;
 		}
 	});
-	
-	function getMonday(d) {
-	  d = new Date(d);
-	  var day = d.getDay(),
-	      diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
-	  return new Date(d.setDate(diff));
-	}
-
-	function init(units, slots) {
-
-		scheduler.locale.labels.timeline_tab = "Timeline";
-		scheduler.locale.labels.section_custom="Section";
-		scheduler.config.time_step = 15;
-		scheduler.config.details_on_create=true;
-		scheduler.config.details_on_dblclick=true;
-		scheduler.config.xml_date="%Y-%m-%d %H:%i";
-		
-		
-		//===============
-		//Configuration
-		//===============	
-		var format = scheduler.date.date_to_str("%H:%i");
-		scheduler.templates.event_bar_text = function(sd, ed, ev){
-			// console.log(ev);
-			return format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + ev.break + " min break)";
-		}
-
-		scheduler.createTimelineView({
-			section_autoheight: false,
-			name:	"timeline",
-			x_unit:	"day",
-			x_date:	"%j %D",
-			x_step:	1,
-			x_size: 7,
-			y_unit: units,
-			y_property:	"section_id",
-			round_position: true,
-			render: "tree",
-			folder_dy:20,
-			dy:60
-		});
-		
-		scheduler.form_blocks["break"] = {
-            render: function (sns) {
-                return "<div class='dhx_cal_block'><input type='number' min='10'/></div>";
-            },
-            set_value: function (node, value, ev) {
-                node.firstChild.value = value || "";
-            },
-            get_value: function (node, ev) {
-                return node.firstChild.value;
-            },
-            focus: function (node) {
-                var a = node; scheduler._focus(a, true);
-            }
-        };
-		//===============
-		//Data loading
-		//===============
-		scheduler.config.lightbox.sections=[	
-			{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
-			{name:"custom", height:23, type:"timeline", options:null , map_to:"section_id" }, //type should be the same as name of the tab
-			{name:"time", height:72, type:"time", map_to:"auto"},
-			{name:"break", height:60, type:"break", map_to:"auto" },
-		]
-		
-		scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
-		scheduler.parse(slots,"json");
-		
-		scheduler.attachEvent("onBeforeLightbox", function(id){
-			// $(".dhx_cal_larea .dhx_wrap_section:eq(2)").append("<div>LLLLLLLLL</div>");
-			// var ev = scheduler.getEvent(id);
-			// console.log(scheduler.formSection('time'));
-			// });
-			return true;
-		});
-	}
-	
 </script>
+
+<div id="shift_form">
+	<form class="form-horizontal">
+		<div class="lead text-info">Add Shift</div>
+		<div class="form-group">
+			<label class="col-md-1" for="select_time"><i class="glyphicon glyphicon-time"></i></label>
+	    	<div class="col-md-6">
+	    		<select id="sel_start_time"></select> -
+	    		<select id="sel_end_time"></select>
+	      	</div>
+	      	<label class="col-md-2" for="break">Break</label>
+	    	<div class="col-md-3">
+	    		<input type="text" id="break" style="width: 30px"></input>
+	    		<span>mins</span>
+	      	</div>
+		</div>
+		<div class="form-group">
+	      <label class="control-label col-md-1" for="description"><i class="glyphicon glyphicon-comment"></i></label>
+	      <div class="col-md-11">
+	        <textarea class="form-control" id="description" placeholder="Notes..."></textarea>
+	        <p>Employees can only see notes for their own shifts</p>
+	      </div>
+	    </div>
+	    <div class="form-group">
+	    	<div class="col-md-offset-1">
+	    		<input type="checkbox" name="publish" id="publish">
+	    		Publish and send notification?
+	    	</div>
+	    </div>
+	    <div class="form-group" style="margin-top:50px">        
+	      	<div class=" col-md-6">
+			    <input type="button" class="btn btn-primary btn-sm" name="save" value="Add" id="save"  onclick="save_form()"> or
+				<input type="button" class="btn btn-secondary btn-sm" name="close" value="Cancel" id="close" onclick="close_form()">
+	      	</div>
+	      	<div class="col-md-6 text-right">
+	      		<input type="button" class="btn btn-danger btn-sm" name="delete" value="Delete" id="delete"  onclick="delete_event()">
+	      	</div>
+	    </div>
+
+		<!-- <input type="text" name="start_date" value="" id="start_date"> -->
+		<!-- <input type="text" name="end_date" value="" id="end_date"> -->
+	</form>
+</div>
 
 <body>
 	<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		<div class="dhx_cal_navline">
-			<button id="btn-save">Save</button>
 			<div class="dhx_cal_prev_button">&nbsp;</div>
 			<div class="dhx_cal_next_button">&nbsp;</div>
 			<div class="dhx_cal_today_button"></div>
