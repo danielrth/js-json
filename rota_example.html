@@ -39,10 +39,18 @@
 	.dhx_section_time select:nth-child(4),select:nth-child(9) {
 		display: none;
 	}
+	#btn-save {
+		position: absolute;
+		top: 14px;
+		right: 240px;
+		width: 70px;
+		height: 30px;
+	}
 </style>
 
 <script type="text/javascript" charset="utf-8">
 	$(document).ready(function(){
+		var EmployeeLimit = 100000;
 	    var allData;
 		var locations=null, roles=null, employees=null, shifts=null;
 		$.ajax({
@@ -66,15 +74,22 @@
 		});
 
 		$('button').click(function(){
-			locations = allData.locations;
-			roles = allData.roles;
-			employees = allData.employees;
-			shifts = allData.shifts;
-			console.log(getUnits(roles, employees));
+			// locations = allData.locations;
+			// roles = allData.roles;
+			// employees = allData.employees;
+			// shifts = allData.shifts;
+			// console.log(getUnits(roles, employees));
+			var evs = scheduler.getEvents(new Date(2017,4,24),new Date(2017,4,30)); 
+			for (var i=0; i<evs.length; i++){
+			       alert(evs[i].text);
+			}
+			// or
+			var evs = scheduler.getEvents();// will return all events
+			console.log(evs);
 		});
 
 		function getUnits(roles, employees) {
-			var unitOpenShift = {key: 100000, label: "Open Shifts"};
+			var unitOpenShift = {key: EmployeeLimit, label: "Open Shifts"};
 			var units = [unitOpenShift];
 			for (var i = 0; i < roles.length; i++) {
 				var unit = {key: i+1, label: roles[i]['name'], open: true, children: []};
@@ -92,7 +107,7 @@
 		function getShiftSlots(roles, employees, shifts) {
 			var shiftSlots = [];
 			for (var i = 0; i < shifts.length; i++) {
-				var sectionId = 100000;
+				var sectionId = EmployeeLimit;
 				var color = "lightgray";
 				if (shifts[i]['employee'] >= 0) {
 					sectionId = generateSectionID( employees[shifts[i]['employee']]['defaultrole'], shifts[i]['employee'] );
@@ -105,7 +120,7 @@
 		}
 
 		function generateSectionID(roleId, employeeId) {
-			return (roleId + 1) * 100000 + employeeId + 1;
+			return (roleId + 1) * EmployeeLimit + employeeId + 1;
 		}
 	});
 	
@@ -191,6 +206,7 @@
 <body>
 	<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		<div class="dhx_cal_navline">
+			<button id="btn-save">Save</button>
 			<div class="dhx_cal_prev_button">&nbsp;</div>
 			<div class="dhx_cal_next_button">&nbsp;</div>
 			<div class="dhx_cal_today_button"></div>

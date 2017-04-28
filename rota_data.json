@@ -1,10 +1,10 @@
 {
 	"locations": ["Office", "Shop Floor", "Home"],
 	"roles": [
-		{"name": "Management", "color": "gray"},
-		{"name": "Sales Assistant", "color":"yellow"},
-		{"name": "Tech Support", "color": "blue"},
-		{"name": "Software Dev", "color": "green"}
+		{"name": "Management", "color": "green"},
+		{"name": "Sales Assistant", "color":"olive"},
+		{"name": "Tech Support", "color": "maroon"},
+		{"name": "Software Dev", "color": "teal"}
 	],
 	"employees": [
 		{"name": "Linda Brown", "defaultrole": 0, "otherroles": [1,2], "locations": [0,1]},
