@@ -12,7 +12,7 @@ function getMonday(d) {
 }
 
 function initScheduler() {
-
+$(".dhx_cal_event_line.dhx_in_move").css('opacity', '0.1');
 	scheduler.locale.labels.timeline_tab = "Timeline";
 	scheduler.locale.labels.section_custom="Section";
 	scheduler.config.details_on_create=true;
@@ -53,22 +53,59 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 	return "<div class=custom-eventline-content>" + format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + (ev.break || 0) + " min break)</div>"
 }
 
-var lastSectionId = 0;
+var dragged_event;
+var roleBeforeDrag, sectionIdBeforeDrag;
+scheduler.attachEvent("onBeforeDrag", function (id, mode, e){
+    if ( mode == "move")
+    	dragged_event=scheduler.getEvent(id);
+    roleBeforeDrag = dragged_event.role;
+    sectionIdBeforeDrag = dragged_event.section_id;
+    console.log(sectionIdBeforeDrag);
+    return true;
+});
+scheduler.attachEvent("onDragEnd", function(){
+    var ev = dragged_event;
+    var newRole;
+ 	if (ev.section_id == -1)
+		newRole = -1;
+	else {
+		newRole = parseInt(ev.section_id / EmployeeLimit) - 1;
+		if (roleBeforeDrag != newRole) {
+			ev.section_id = sectionIdBeforeDrag;
+			scheduler.updateEvent(ev.id);
+		}
+	}
+});
+
+var lastDraggingEventSectionId;
 scheduler.attachEvent("onEventDrag", function (id, mode, e){
 	if ( mode != "move")
 		return;
 	var ev = scheduler.getEvent(id);
-	if ( ev.section_id == lastSectionId)
+	if (lastDraggingEventSectionId == ev.section_id)
 		return;
+	var newRole;
+	if (ev.section_id == -1) {
+		$(".dhx_cal_event_line").css('opacity', '1');
+		$(".dhx_matrix_line td").css('opacity', '1');
+	}
+	else {
+		newRole = parseInt(ev.section_id / EmployeeLimit) - 1 ;
+		if (roleBeforeDrag != newRole) {
+			$(".dhx_cal_event_line").css('opacity', '0.1');
+			$(".dhx_matrix_line td").css('opacity', '0.1');
+			console.log('ahhhhhh..............');
+		}
+		else {
+			$(".dhx_cal_event_line").css('opacity', '1');
+			$(".dhx_matrix_line td").css('opacity', '1');
+		}
+	}
+	lastDraggingEventSectionId = ev.section_id;
 
-	if (ev.section_id == -1)
-		ev.role = -1;
-	else
-		ev.role = parseInt(ev.section_id / EmployeeLimit) - 1 ;
-	ev.emp = ev.section_id % EmployeeLimit;
-	ev.color = ev.role == -1 ? OpenShiftColor : roles[ev.role]['color'];
-
-	lastSectionId = ev.section_id;
+	e.stopPropagation();
+	e.preventDefault();
+	return false;
 });
 
 scheduler.showLightbox = function(id) {
@@ -115,7 +152,7 @@ function save_form() {
 	ev.end_date.setDate(ev.start_date.getDate());
 	ev.start_date.setHours($("#sel_start_time").val());
 	ev.end_date.setHours($("#sel_end_time").val());
-	if (ev.section_id == -1)
+	
 	ev.role = parseInt($("#sel_role").val());
 	ev.emp = parseInt($("#sel_emp").val());
 	if (ev.role == -1) {
