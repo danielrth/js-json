@@ -15,7 +15,7 @@
 		{"name": "Daniel Roth", "defaultrole": 3, "otherroles": [2], "locations": [2]}
 	],
 	"shifts": [
-		{ "employee": -1, "task": "Task 111", "start_date": "2017-05-02 09:00", "end_date": "2017-05-04 14:00", "break": 300 },
+		{ "employee": -1, "role": 2, "task": "Task 111", "start_date": "2017-05-02 09:00", "end_date": "2017-05-02 14:00", "break": 300 },
 		{ "employee": 0, "task": "Task A-12458", "start_date": "2017-05-02 09:00", "end_date": "2017-05-02 14:00", "break": 30 },
 		{ "employee": 1, "task": "Task B-45754", "start_date": "2017-05-04 10:00", "end_date": "2017-05-04 14:00", "break": 20 },
 		{ "employee": 2, "task": "Task A-357", "start_date": "2017-05-05 09:30", "end_date": "2017-05-05 12:00", "break": 0 },

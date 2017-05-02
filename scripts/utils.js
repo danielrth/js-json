@@ -12,7 +12,6 @@ function getMonday(d) {
 }
 
 function initScheduler() {
-$(".dhx_cal_event_line.dhx_in_move").css('opacity', '0.1');
 	scheduler.locale.labels.timeline_tab = "Timeline";
 	scheduler.locale.labels.section_custom="Section";
 	scheduler.config.details_on_create=true;
@@ -49,7 +48,11 @@ $(".dhx_cal_event_line.dhx_in_move").css('opacity', '0.1');
 var format = scheduler.date.date_to_str("%H:%i");
 scheduler.templates.event_bar_text = function(sd, ed, ev){
 	// console.log(ev);
-	return "<div class=custom-eventline-content>" + format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + (ev.break || 0) + " min break)</div>"
+	return "<div class=custom-eventline-content>"
+		 + format(sd)+" - "+format(ed) + "<br>"
+		 + ev.text + "<br>"
+		 + (ev.role < 0 ? "Open Shift" : roles[ev.role]['name'])
+		 + "(" + (ev.break || 0) + " min break)</div>"
 }
 
 var dragged_event;
@@ -97,9 +100,8 @@ scheduler.attachEvent("onDragEnd", function(){
 		return;
     var ev = dragged_event;
     var newRole;
- 	if (ev.section_id == -1)
-		newRole = -1;
-	else {
+ 	if (ev.section_id > -1)
+ 	{
 		newRole = parseInt(ev.section_id / EmployeeLimit) - 1;
 		if (roleBeforeDrag != newRole) {
 			ev.section_id = sectionIdBeforeDrag;
@@ -117,32 +119,40 @@ scheduler.showLightbox = function(id) {
 	$("#sel_start_time").val( ev.start_date.getHours() );
 	$("#sel_end_time").val( ev.end_date.getHours() );
 
-	if (ev.role == undefined) { //click empty event
-		if (ev.section_id == -1)
-			ev.role = -1;
-		else
-			ev.role = parseInt(ev.section_id / EmployeeLimit) - 1 ;
-		ev.emp = ev.section_id % EmployeeLimit;
+	var newRole;
+	var newEmp;
+	if (ev.role == undefined) { // click new event
+		if (ev.section_id == -1) {// click on open section
+			newRole = -1;
+			newEmp = -1;
+		}
+		else {//click on role section
+			newRole = parseInt(ev.section_id / EmployeeLimit) - 1 ;
+			newEmp = ev.section_id % EmployeeLimit;
+		}
 
 		$('.btn#delete').hide();
 		$('#event_form_title').html("Add Shift");
-		// $('#row_for_emp_select').hide();
+		$('#row_for_emp_select').hide();
 	}
-	else { //click event bar already created
+	else { //click edit event
+		newRole = ev.role;
+		newEmp = ev.section_id % EmployeeLimit;
+
 		$('.btn#delete').show();
 		$('#event_form_title').html("Edit Shift");
-		// $('#row_for_emp_select').show();
+		$('#row_for_emp_select').show();
 	}
-	$('#sel_role').val( ev.role );
 
-	$('#sel_emp').find('option').remove();
-	if (ev.role > -1) {
-		var emps = dhxUnits[ev.role+1]['children'];
+	$('#sel_role').val( newRole );
+	$('#sel_emp').find('option[value!="-1"]').remove();
+	if (newRole > -1) {
+		var emps = dhxUnits[newRole+1]['children'];
 		for (var i=0; i<emps.length; i++)
 			$("#sel_emp").append(new Option( emps[i]['label'], emps[i]['key'] % EmployeeLimit ));
-		$("#sel_emp").val(ev.emp);
+		
 	}
-	console.log(ev);
+	$("#sel_emp").val(newEmp);
 };
 
 function save_form() {
@@ -153,15 +163,26 @@ function save_form() {
 	ev.start_date.setHours($("#sel_start_time").val());
 	ev.end_date.setHours($("#sel_end_time").val());
 	
-	ev.role = parseInt($("#sel_role").val());
-	ev.emp = parseInt($("#sel_emp").val());
-	if (ev.role == -1) {
+	var newRole = parseInt($("#sel_role").val());
+	var newEmp = parseInt($("#sel_emp").val());
+	if ( newRole == -1 ) { //user selected empty role
 		ev.section_id = -1;
-		ev.color = OpenShiftColor
+		ev.role = -1;
+		ev.emp = -1;
+		ev.color = OpenShiftColor;
 	}
 	else {
-		ev.section_id = generateSectionID( ev.role, ev.emp )
-		ev.color = roles[ev.role]['color'];
+		if ( newEmp == -1 ) { //user selected open shift
+			ev.section_id = -1;
+			ev.role = newRole;
+			ev.emp = -1;
+		}
+		else {
+			ev.section_id = generateSectionId(newRole, newEmp);
+			ev.role = newRole;
+			ev.emp = newEmp;
+		}
+		ev.color = roles[newRole]['color'];
 	}
 	console.log(ev);
 
@@ -187,7 +208,7 @@ function getUnits(roles, employees) {
 
 	for (var i = 0; i < employees.length; i++) {
 		var defaultRole = employees[i]['defaultrole'];
-		var unit = {key: generateSectionID(defaultRole, i), label: employees[i]['name']};
+		var unit = {key: generateSectionId(defaultRole, i), label: employees[i]['name']};
 		units[defaultRole + 1]['children'].push(unit);
 	}
 	return units;
@@ -196,25 +217,42 @@ function getUnits(roles, employees) {
 function getShiftSlots(roles, employees, shifts) {
 	var shiftSlots = [];
 	for (var i = 0; i < shifts.length; i++) {
-		var sectionId = EmployeeLimit;
-		var color = OpenShiftColor;
-		var role = -1;
+		var sectionId;
+		var color;
+		var role;
 		if (shifts[i]['employee'] >= 0) {
 			role = employees[shifts[i]['employee']]['defaultrole'];
-			sectionId = generateSectionID( role, shifts[i]['employee'] );
-			color = roles[employees[shifts[i]['employee']]['defaultrole']]['color'];
+			sectionId = generateSectionId( role, shifts[i]['employee'] );
 		}
 		else {
+			role = shifts[i]['role'];
 			sectionId = -1;
 		}
-		var shiftSlot = {start_date: shifts[i]['start_date'], end_date: shifts[i]['end_date'], text: shifts[i]['task'], section_id: sectionId, color: color, break: shifts[i]['break'], role: role, emp:shifts[i]['employee']}
+		if (role == -1)
+			color = OpenShiftColor
+		else
+			color = roles[role]['color'];
+
+		var emp = shifts[i]['employee']
+		var shiftSlot = { 
+			start_date: shifts[i]['start_date'], 
+			end_date: shifts[i]['end_date'], 
+			text: shifts[i]['task'], 
+			section_id: sectionId, 
+			color: color, 
+			break: shifts[i]['break'], 
+			role: role, emp: emp }
 		shiftSlots.push(shiftSlot);
 	}
 	return shiftSlots;
 }
 
-function generateSectionID(roleId, employeeId) {
-	return ( roleId + 1 ) * EmployeeLimit + employeeId;
+function generateSectionId( roleId, employeeId ) {
+	/*if emp is open, shift section is open shift*/
+	if ( employeeId == -1 )
+		return -1;
+	else
+		return ( roleId + 1 ) * EmployeeLimit + employeeId;
 }
 
 $(document).ready(function(){
@@ -250,8 +288,11 @@ $(document).ready(function(){
 		console.log(error);
 	});
 
+	/*=========================
+	Role dropdown change event
+	==========================*/
 	$('#sel_role').on('change', function() {
-  		$('#sel_emp').find('option').remove();
+  		$('#sel_emp').find('option[value!="-1"]').remove();
   		if (this.value == -1)	return;
   		var emps = dhxUnits[parseInt(this.value)+1]['children'];
   		for (var i=0; i<emps.length; i++)
