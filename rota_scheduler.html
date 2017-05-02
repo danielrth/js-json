@@ -21,6 +21,10 @@
 		padding:0px;
 		height:100%;
 		overflow:hidden;
+	}
+	.dhx_cal_header, .dhx_scale_bar {
+		background-color: #969394;
+		color: #000;
 	}	
 	.one_line{
 		white-space:nowrap;
@@ -33,9 +37,10 @@
 		border-radius: 0;
 	    background-color: #bbb;
 	    border: #888 solid 1px;
-	    padding-left: 2px;
+	    padding-left: 6px;
 	    padding-right: 0px;
 	    color: #222;
+	    margin-left: 2px;
 	}
 	.dhx_event_resize{
 		display: none;
@@ -66,7 +71,7 @@
 
 <div id="shift_form">
 	<form class="form-horizontal">
-		<div class="lead text-info">Add Shift</div>
+		<div class="lead text-info" id="event_form_title">Add Shift</div>
 		<div class="form-group">
 			<label class="col-md-1" for="select_time"><i class="glyphicon glyphicon-time"></i></label>
 	    	<div class="col-md-6">
@@ -85,7 +90,7 @@
 	    		<select id="sel_role"><option value=-1></option></select>
 	      	</div>
 		</div>
-		<div class="form-group">
+		<div class="form-group" id="row_for_emp_select">
 			<label class="col-md-1" for="sel_emp"><i class="glyphicon glyphicon-user"></i></label>
 	    	<div class="col-md-11">
 	    		<select id="sel_emp"></select>
@@ -106,7 +111,7 @@
 	    </div>
 	    <div class="form-group" style="margin-top:50px">        
 	      	<div class=" col-md-6">
-			    <input type="button" class="btn btn-primary btn-sm" name="save" value="Add" id="save"  onclick="save_form()"> or
+			    <input type="button" class="btn btn-primary btn-sm" name="save" value="Save" id="save"  onclick="save_form()"> or
 				<input type="button" class="btn btn-secondary btn-sm" name="close" value="Cancel" id="close" onclick="close_form()">
 	      	</div>
 	      	<div class="col-md-6 text-right">

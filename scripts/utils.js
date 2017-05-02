@@ -1,4 +1,6 @@
 var EmployeeLimit = 100000;
+var OpenShiftColor = "lightgray";
+
 var allData=null, locations=null, roles=null, employees=null, shifts=null;
 var dhxUnits, dhxSlots;
 
@@ -48,10 +50,27 @@ function initScheduler() {
 var format = scheduler.date.date_to_str("%H:%i");
 scheduler.templates.event_bar_text = function(sd, ed, ev){
 	// console.log(ev);
-	return "<div class=custom-eventline-content>" + format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + (ev.break || 0) + " min break</div>"
-	// return format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + (ev.break || 0) + " min break)";
+	return "<div class=custom-eventline-content>" + format(sd)+" - "+format(ed) + "<br>" + ev.text + "<br>(" + (ev.break || 0) + " min break)</div>"
 }
-		
+
+var lastSectionId = 0;
+scheduler.attachEvent("onEventDrag", function (id, mode, e){
+	if ( mode != "move")
+		return;
+	var ev = scheduler.getEvent(id);
+	if ( ev.section_id == lastSectionId)
+		return;
+
+	if (ev.section_id == -1)
+		ev.role = -1;
+	else
+		ev.role = parseInt(ev.section_id / EmployeeLimit) - 1 ;
+	ev.emp = ev.section_id % EmployeeLimit;
+	ev.color = ev.role == -1 ? OpenShiftColor : roles[ev.role]['color'];
+
+	lastSectionId = ev.section_id;
+});
+
 scheduler.showLightbox = function(id) {
 	var ev = scheduler.getEvent(id);
 	scheduler.startLightbox(id, document.getElementById("shift_form"));
@@ -61,12 +80,21 @@ scheduler.showLightbox = function(id) {
 	$("#sel_start_time").val( ev.start_date.getHours() );
 	$("#sel_end_time").val( ev.end_date.getHours() );
 
-	if (ev.role == undefined) {
+	if (ev.role == undefined) { //click empty event
 		if (ev.section_id == -1)
 			ev.role = -1;
 		else
 			ev.role = parseInt(ev.section_id / EmployeeLimit) - 1 ;
 		ev.emp = ev.section_id % EmployeeLimit;
+
+		$('.btn#delete').hide();
+		$('#event_form_title').html("Add Shift");
+		// $('#row_for_emp_select').hide();
+	}
+	else { //click event bar already created
+		$('.btn#delete').show();
+		$('#event_form_title').html("Edit Shift");
+		// $('#row_for_emp_select').show();
 	}
 	$('#sel_role').val( ev.role );
 
@@ -84,20 +112,20 @@ function save_form() {
 	var ev = scheduler.getEvent(scheduler.getState().lightbox_id);
 	ev.text = $("#description").val();
 	ev.break = $("#break").val();
+	ev.end_date.setDate(ev.start_date.getDate());
+	ev.start_date.setHours($("#sel_start_time").val());
+	ev.end_date.setHours($("#sel_end_time").val());
+	if (ev.section_id == -1)
 	ev.role = parseInt($("#sel_role").val());
 	ev.emp = parseInt($("#sel_emp").val());
 	if (ev.role == -1) {
 		ev.section_id = -1;
-		ev.color = "lightgray";
+		ev.color = OpenShiftColor
 	}
 	else {
 		ev.section_id = generateSectionID( ev.role, ev.emp )
 		ev.color = roles[ev.role]['color'];
 	}
-	ev.end_date.setDate(ev.start_date.getDate());
-	ev.start_date.setHours($("#sel_start_time").val());
-	ev.end_date.setHours($("#sel_end_time").val());
-	ev.color = roles[ev.role]['color'];
 	console.log(ev);
 
 	scheduler.endLightbox(true, document.getElementById("shift_form"));
@@ -132,7 +160,7 @@ function getShiftSlots(roles, employees, shifts) {
 	var shiftSlots = [];
 	for (var i = 0; i < shifts.length; i++) {
 		var sectionId = EmployeeLimit;
-		var color = "lightgray";
+		var color = OpenShiftColor;
 		var role = -1;
 		if (shifts[i]['employee'] >= 0) {
 			role = employees[shifts[i]['employee']]['defaultrole'];
@@ -187,6 +215,7 @@ $(document).ready(function(){
 
 	$('#sel_role').on('change', function() {
   		$('#sel_emp').find('option').remove();
+  		if (this.value == -1)	return;
   		var emps = dhxUnits[parseInt(this.value)+1]['children'];
   		for (var i=0; i<emps.length; i++)
 			$("#sel_emp").append(new Option( emps[i]['label'], emps[i]['key'] % EmployeeLimit ));
