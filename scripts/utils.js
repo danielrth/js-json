@@ -43,7 +43,6 @@ $(".dhx_cal_event_line.dhx_in_move").css('opacity', '0.1');
 	//Data loading
 	//===============
 	scheduler.init('scheduler_here',getMonday(new Date()),"timeline");
-	
 	scheduler.parse(dhxSlots,"json");
 }
 
@@ -55,26 +54,15 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 
 var dragged_event;
 var roleBeforeDrag, sectionIdBeforeDrag;
+var lastEventMode;
 scheduler.attachEvent("onBeforeDrag", function (id, mode, e){
-    if ( mode == "move")
-    	dragged_event=scheduler.getEvent(id);
+	lastEventMode = mode;
+    if ( mode != "move")
+    	return;
+    dragged_event=scheduler.getEvent(id);
     roleBeforeDrag = dragged_event.role;
     sectionIdBeforeDrag = dragged_event.section_id;
-    console.log(sectionIdBeforeDrag);
     return true;
-});
-scheduler.attachEvent("onDragEnd", function(){
-    var ev = dragged_event;
-    var newRole;
- 	if (ev.section_id == -1)
-		newRole = -1;
-	else {
-		newRole = parseInt(ev.section_id / EmployeeLimit) - 1;
-		if (roleBeforeDrag != newRole) {
-			ev.section_id = sectionIdBeforeDrag;
-			scheduler.updateEvent(ev.id);
-		}
-	}
 });
 
 var lastDraggingEventSectionId;
@@ -102,10 +90,22 @@ scheduler.attachEvent("onEventDrag", function (id, mode, e){
 		}
 	}
 	lastDraggingEventSectionId = ev.section_id;
+});
 
-	e.stopPropagation();
-	e.preventDefault();
-	return false;
+scheduler.attachEvent("onDragEnd", function(){
+	if (lastEventMode != "move")
+		return;
+    var ev = dragged_event;
+    var newRole;
+ 	if (ev.section_id == -1)
+		newRole = -1;
+	else {
+		newRole = parseInt(ev.section_id / EmployeeLimit) - 1;
+		if (roleBeforeDrag != newRole) {
+			ev.section_id = sectionIdBeforeDrag;
+			scheduler.updateEvent(ev.id);
+		}
+	}
 });
 
 scheduler.showLightbox = function(id) {
