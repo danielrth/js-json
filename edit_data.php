@@ -1,75 +1,68 @@
+<?
+	$data = $_POST['data'];
 
-<!doctype html>
-<head>
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-	<title>Edit data</title>
+	$inp = file_get_contents('rota_data.json');
+	$tempArray = json_decode($inp);
+	$shifts = $tempArray->shifts;
 
-	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.0.min.js"></script>
-	
-	<style type="text/css" >
-	</style>
-	<script>
-		$(document).ready(function(){
-			var allData;
-			var locations=null, roles=null, employees=null, shifts=null;
-			$.ajax({
-			  	url: "rota_data.json",
-			  	type: 'GET'
-			})
-			.done(function(data) {
-				allData = JSON.parse(data);
-				// console.log(allData);
-			})
-			.fail(function(error) {
-				console.log(error);
-			});
+	if ( isset($data['delId']) ) {
+		//delete shift from JSON file
+		for($i = 0; $i < count($tempArray->shifts); $i++) {
+		    if ($data['delId'] == ($tempArray->shifts)[$i]->id) {
+		        array_splice( $tempArray->shifts, $i, 1 );
+		        break;
+		    }
+		}
 
-			$('button').click(function(){
-				locations = allData.locations;
-				roles = allData.roles;
-				employees = allData.employees;
-				shifts = allData.shifts;
-				console.log(getUnits(roles, employees));
-				console.log(getShiftSlots(roles, employees, shifts));
-			});
+		$jsonData = json_encode($tempArray);
+		file_put_contents('rota_data.json', $jsonData);
 
-			function getUnits(roles, employees) {
-				var unitOpenShift = {key: 100000, label: "Open Shifts"};
-				var units = [unitOpenShift];
-				for (var i = 0; i < roles.length; i++) {
-					var unit = {key: i+1, label: roles[i]['name'], open: true, children: []};
-					units.push(unit);
-				}
+		echo "OK";
+		return;
+	}
+	else {
+		if ( isset($data['role']) )
+			$data['role'] = (int)$data['role'];
+		if ( isset($data['employee']) )
+			$data['employee'] = (int)$data['employee'];
 
-				for (var i = 0; i < employees.length; i++) {
-					var defaultRole = employees[i]['defaultrole'];
-					var unit = {key: generateSectionID(defaultRole, i), label: employees[i]['name']};
-					units[defaultRole + 1]['children'].push(unit);
-				}
-				return units;
+		if ( $data['id'] === "new" ) {
+			//insert new shift to JSON file
+			$newShiftId = 0;
+			if ( count($shifts) > 0 ) {
+				usort($shifts, function($a, $b) {
+				    if ($a->id == $b->id) {
+				        return 0;
+				    }
+				    return $a->id < $b->id ? -1 : 1;
+				});
+				$newShiftId = $shifts[count($shifts)-1]->id + 1;
 			}
+			
+			$data['id'] = $newShiftId;
+			array_push($tempArray->shifts, $data);
 
-			function getShiftSlots(roles, employees, shifts) {
-				var shiftSlots = [];
-				for (var i = 0; i < shifts.length; i++) {
-					var sectionId = 100000;
-					var color = "lightgray";
-					if (shifts[i]['employee'] >= 0) {
-						sectionId = generateSectionID( employees[shifts[i]['employee']]['defaultrole'], shifts[i]['employee'] );
-						color = roles[employees[shifts[i]['employee']]['defaultrole']]['color'];
-					}
-					var shiftSlot = {start_date: shifts[i]['start_date'], end_date: shifts[i]['end_date'], text: shifts[i]['task'], section_id: sectionId, color: color, break: shifts[i]['break']}
-					shiftSlots.push(shiftSlot);
-				}
-				return shiftSlots;
-			}
+			$jsonData = json_encode($tempArray);
+			file_put_contents('rota_data.json', $jsonData);
 
-			function generateSectionID(roleId, employeeId) {
-				return (roleId + 1) * 100000 + employeeId + 1;
+			echo ($newShiftId);
+			return;
+		}
+		else {
+			//update shift in JSON file
+			for( $i = 0; $i < count($tempArray->shifts); $i++ ) {
+			    if ( $data['id'] == ($tempArray->shifts)[$i]->id ) {
+			        // unset( ($tempArray->shifts)[$i] );
+			        ($tempArray->shifts)[$i] = $data;
+			        break;
+			    }
 			}
-		});
-	</script>
-</head>
-<body>
-<button>Load</button>
-</body>
+			
+			$jsonData = json_encode($tempArray);
+			file_put_contents('rota_data.json', $jsonData);
+			// echo $jsonData;
+			echo "OK";
+			return;
+		}
+	}
+?>

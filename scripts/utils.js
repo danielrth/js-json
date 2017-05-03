@@ -47,11 +47,10 @@ function initScheduler() {
 
 var format = scheduler.date.date_to_str("%H:%i");
 scheduler.templates.event_bar_text = function(sd, ed, ev){
-	// console.log(ev);
 	return "<div class=custom-eventline-content>"
 		 + format(sd)+" - "+format(ed) + "<br>"
 		 + ev.text + "<br>"
-		 + (ev.role < 0 ? "Open Shift" : roles[ev.role]['name'])
+		 + ( ev.role == undefined ? "" : (ev.role < 0 ? "Open Shift" : roles[ev.role]['name']) )
 		 + "(" + (ev.break || 0) + " min break)</div>"
 }
 
@@ -184,8 +183,8 @@ function save_form() {
 		}
 		ev.color = roles[newRole]['color'];
 	}
-	console.log(ev);
 
+	saveServerShift (ev);
 	scheduler.endLightbox(true, document.getElementById("shift_form"));
 }
 function close_form() {
@@ -194,8 +193,47 @@ function close_form() {
 
 function delete_event() {
 	var event_id = scheduler.getState().lightbox_id;
+	var ev = scheduler.getEvent(scheduler.getState().lightbox_id);
+	deleteServerShift(ev.shift_id);
+
 	scheduler.endLightbox(false, document.getElementById("shift_form"));
 	scheduler.deleteEvent(event_id);
+}
+
+function saveServerShift(ev) {
+	var isNew = ev.shift_id == undefined;
+	var newShiftId = ( isNew ? "new" : ev.shift_id );
+	var newShift = {
+		id: newShiftId,
+		employee: ev.emp, task: ev.text, 
+		start_date: moment(ev.start_date).format('YYYY-MM-DD HH:mm'), 
+		end_date: moment(ev.end_date).format('YYYY-MM-DD HH:mm'), 
+		break: ev.break };
+
+	if ( ev.emp == -1 ) {
+		newShift['role'] = ev.role;
+	}
+
+	$.ajax({
+	    type: 'POST',
+	    url: 'edit_data.php',
+	    data: { 'data': newShift },
+	    success: function(msg) {
+	      	if (isNew)
+	      		ev.shift_id = msg;
+	    }
+	});
+}
+
+function deleteServerShift(shiftId) {
+	$.ajax({
+	    type: 'POST',
+	    url: 'edit_data.php',
+	    data: { 'data': {delId: shiftId} },
+	    success: function(msg) {
+	    	console.log(msg);
+	    }
+	});
 }
 
 function getUnits(roles, employees) {
@@ -233,15 +271,17 @@ function getShiftSlots(roles, employees, shifts) {
 		else
 			color = roles[role]['color'];
 
-		var emp = shifts[i]['employee']
+		var emp = shifts[i]['employee'];
 		var shiftSlot = { 
+			shift_id: shifts[i]['id'], 
 			start_date: shifts[i]['start_date'], 
 			end_date: shifts[i]['end_date'], 
 			text: shifts[i]['task'], 
 			section_id: sectionId, 
 			color: color, 
 			break: shifts[i]['break'], 
-			role: role, emp: emp }
+			role: role, emp: emp 
+		};
 		shiftSlots.push(shiftSlot);
 	}
 	return shiftSlots;
