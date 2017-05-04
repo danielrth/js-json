@@ -8,7 +8,7 @@
 	if ( isset($data['delId']) ) {
 		//delete shift from JSON file
 		for($i = 0; $i < count($tempArray->shifts); $i++) {
-		    if ($data['delId'] == ($tempArray->shifts)[$i]->id) {
+		    if ($data['delId'] == $tempArray->shifts[$i]->id) {
 		        array_splice( $tempArray->shifts, $i, 1 );
 		        break;
 		    }
@@ -51,9 +51,9 @@
 		else {
 			//update shift in JSON file
 			for( $i = 0; $i < count($tempArray->shifts); $i++ ) {
-			    if ( $data['id'] == ($tempArray->shifts)[$i]->id ) {
+			    if ( $data['id'] == $tempArray->shifts[$i]->id ) {
 			        // unset( ($tempArray->shifts)[$i] );
-			        ($tempArray->shifts)[$i] = $data;
+			        $tempArray->shifts[$i] = $data;
 			        break;
 			    }
 			}
