@@ -15,67 +15,10 @@
 	<script src='./scripts/utils.js' type="text/javascript" charset="utf-8"></script>
 	<script src='./scripts/dhx_loader.js' type="text/javascript" charset="utf-8"></script>
 
-	<link rel='stylesheet' type='text/css' href='./codebase/dhtmlxscheduler.css'>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel='stylesheet' type='text/css' href='./codebase/dhtmlxscheduler.css'>
+	<link rel='stylesheet' type='text/css' href='./styles.css'>
 </head>
-
-<style type="text/css" >
-	html, body{
-		margin:0px;
-		padding:0px;
-		height:100%;
-		overflow:hidden;
-	}
-	.dhx_cal_header, .dhx_scale_bar {
-		background-color: #969394;
-		color: #000;
-	}	
-	.one_line{
-		white-space:nowrap;
-		overflow:hidden;
-		padding-top:5px; padding-left:5px;
-		text-align:left !important;
-	}
-	.dhx_cal_event_line{
-		height: 54px !important;
-		border-radius: 0;
-	    background-color: #bbb;
-	    border: #888 solid 1px;
-	    padding-left: 6px;
-	    padding-right: 0px;
-	    color: #222;
-	    margin-left: 2px;
-	}
-	.dhx_matrix_line td{
-		/*opacity: 0.1 !important;*/
-		/*background-color: red;*/
-	}
-	.dhx_event_resize{
-		display: none;
-	}
-	.custom-eventline-content {
-		widows: 100%;
-		height: 100%;
-		background-color: #fff;
-		padding-left: 5px;
-	}
-	#shift_form {
-		position: absolute;
-		top: 100px;
-		left: 200px;
-		z-index: 10001;
-		display: none;
-		background-color: white;
-		border: 2px solid teal;
-		padding: 20px;
-		font-family: Tahoma;
-		font-size: 10pt;
-		border-radius: 10px;
-	}
-	#shift_form label {
-		color: gray;
-	}
-</style>
 
 <div id="shift_form">
 	<form class="form-horizontal">
@@ -136,10 +79,11 @@
 			<div class="dhx_cal_next_button">&nbsp;</div>
 			<div class="dhx_cal_today_button"></div>
 			<div class="dhx_cal_date"></div>
-			<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
-			<div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
-			<div class="dhx_cal_tab" name="timeline_tab" style="right:280px;"></div>
-			<div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+			<select id="sel_location" class="form-control"><option value=-1>Select Location</option></select>
+			<div class="dhx_cal_tab" name="day_tab"></div>
+			<div class="dhx_cal_tab" name="week_tab"></div>
+			<div class="dhx_cal_tab" name="timeline_tab"></div>
+			<div class="dhx_cal_tab" name="month_tab"></div>
 		</div>
 		<div class="dhx_cal_header">
 		</div>

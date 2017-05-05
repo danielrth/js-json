@@ -48,7 +48,7 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 
 var dragged_event;
 var roleBeforeDrag, sectionIdBeforeDrag;
-var lastEventMode;
+var lastEventMode, lastEventDate = [];
 scheduler.attachEvent("onBeforeDrag", function (id, mode, e){
 	lastEventMode = mode;
     if ( mode != "move")
@@ -56,6 +56,8 @@ scheduler.attachEvent("onBeforeDrag", function (id, mode, e){
     dragged_event=scheduler.getEvent(id);
     roleBeforeDrag = dragged_event.role;
     sectionIdBeforeDrag = dragged_event.section_id;
+    lastEventDate[0] = dragged_event.start_date.getMonth();
+    lastEventDate[1] = dragged_event.start_date.getDate();
     return true;
 });
 
@@ -90,15 +92,26 @@ scheduler.attachEvent("onDragEnd", function(){
 	if (lastEventMode != "move")
 		return;
     var ev = dragged_event;
-    var newRole;
  	if (ev.section_id > -1)
  	{
 		newRole = parseInt(ev.section_id / EmployeeLimit) - 1;
 		if (roleBeforeDrag != newRole) {
 			ev.section_id = sectionIdBeforeDrag;
+			ev.start_date.setMonth(lastEventDate[0]);
+			ev.start_date.setDate(lastEventDate[1]);
+			ev.end_date.setMonth(lastEventDate[0]);
+			ev.end_date.setDate(lastEventDate[1]);
 			scheduler.updateEvent(ev.id);
+			return;
 		}
 	}
+
+    ev.emp = ev.section_id == -1 ? -1 : ev.section_id % EmployeeLimit;
+	saveServerShift (ev);
+});
+scheduler.attachEvent("onBeforeTodayDisplayed", function (){
+    initScheduler();
+    return false;
 });
 
 scheduler.showLightbox = function(id) {

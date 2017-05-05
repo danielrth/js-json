@@ -49,7 +49,16 @@ function getUnits(roles, employees) {
 		units.push(unit);
 	}
 
+	var selLocId = parseInt( $('#sel_location').val() );
 	for (var i = 0; i < employees.length; i++) {
+		//filter employees of selected location
+		if ( selLocId != -1 ) {
+			var arrEmpLocations = employees[i]['locations'];
+			if ( arrEmpLocations.indexOf(selLocId) == -1 ) {
+				continue;
+			}
+		}
+
 		var defaultRole = employees[i]['defaultrole'];
 		var unit = {key: generateSectionId(defaultRole, i), label: employees[i]['name']};
 		units[defaultRole + 1]['children'].push(unit);
@@ -60,10 +69,20 @@ function getUnits(roles, employees) {
 function getShiftSlots(roles, employees, shifts) {
 	var shiftSlots = [];
 	for (var i = 0; i < shifts.length; i++) {
+		//filter with location
+		var emp = shifts[i]['employee'];
+		var selLocId = parseInt( $('#sel_location').val() );
+		if ( emp != -1 && selLocId != -1 ) {
+			var arrEmpLocations = employees[emp]['locations'];
+			if ( arrEmpLocations.indexOf(selLocId) == -1 ) {
+				continue;
+			}	
+		}
+
 		var sectionId;
 		var color;
 		var role;
-		if (shifts[i]['employee'] >= 0) {
+		if (emp != -1) {
 			role = employees[shifts[i]['employee']]['defaultrole'];
 			sectionId = generateSectionId( role, shifts[i]['employee'] );
 		}
@@ -76,7 +95,6 @@ function getShiftSlots(roles, employees, shifts) {
 		else
 			color = roles[role]['color'];
 
-		var emp = shifts[i]['employee'];
 		var shiftSlot = { 
 			shift_id: shifts[i]['id'], 
 			start_date: shifts[i]['start_date'], 
