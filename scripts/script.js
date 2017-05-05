@@ -9,7 +9,7 @@ $(document).ready(function(){
 	}
 
 	$.ajax({
-	  	url: "rota_data.json",
+	  	url: "./backend/rota_data.json",
 	  	type: 'GET'
 	})
 	.done(function(data) {

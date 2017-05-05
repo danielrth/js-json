@@ -21,7 +21,7 @@ function saveServerShift(ev) {
 
 	$.ajax({
 	    type: 'POST',
-	    url: 'edit_data.php',
+	    url: './backend/edit_shifts.php',
 	    data: { 'data': newShift },
 	    success: function(msg) {
 	      	if (isNew)
@@ -33,7 +33,7 @@ function saveServerShift(ev) {
 function deleteServerShift(shiftId) {
 	$.ajax({
 	    type: 'POST',
-	    url: 'edit_data.php',
+	    url: './backend/edit_shifts.php',
 	    data: { 'data': {delId: shiftId} },
 	    success: function(msg) {
 	    	console.log(msg);
