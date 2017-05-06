@@ -1,0 +1,109 @@
+<!doctype html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Rota Scheduler</title>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="./scripts/basedata_editor.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<style type="text/css">
+	.scrollable-menu {
+	    height: auto;
+	    max-height: 200px;
+	    overflow-x: hidden;
+	}
+	.btn.btn-primary {
+		margin-top: 20px;
+	}
+</style>
+<body>
+	<div class="container">
+		<div class="col-md-4">
+			<div class="page-header"><h2>Locations</h2></div>
+			<table class="table table-bordered">
+				<tbody id="tbl_locations"></tbody>
+			</table>
+
+			<div class="page-header"><h3>New Location</h3></div>
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Name" id="txt_loc_name" />	
+			</div>
+			<div class="form-group">
+				<button class="btn btn-primary" id="btn_save_loc">Add Location</button>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="page-header"><h2>Roles</h2></div>
+			<table class="table table-bordered">
+				<tbody id="tbl_roles"></tbody>
+			</table>
+
+			<div class="page-header"><h3>New Role</h3></div>
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Name" id="txt_role_name" />	
+			</div>
+			<div class="dropdown">
+			    <button class="btn btn-defalut dropdown-toggle" type="button" data-toggle="dropdown">Select Color <span class="caret"></span></button>
+			    <ul class="dropdown-menu scrollable-menu" id="mnu_color" role="menu">
+			    </ul>
+			</div>
+			<div class="form-group">
+				<button class="btn btn-primary" id="btn_save_role">Add Role</button>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="form-horizontal">
+				<div class="page-header"><h2>Employees</h2></div>
+				<table class="table table-bordered">
+					<tbody id="tbl_employees"></tbody>
+				</table>
+
+				<div class="page-header"><h3>New Employee</h3></div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="txt_emp_name">Name: </label>
+				    <div class="col-sm-5">
+				    	<input type="text" class="form-control" placeholder="Name" id="txt_emp_name" />
+				    </div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="sel_emp_role">Role: </label>
+				    <div class="col-sm-5">
+				    	<select class="form-control" id="sel_emp_role"></select>
+				    </div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="sel_other_role">Default Role: </label>
+				    <div class="col-sm-5">
+				    	<select class="form-control" id="sel_other_role"></select>
+				    </div>
+				    <div class="col-sm-3">
+				    	<button class="btn btn-defalut" id="btn_emp_other_role">+</button>
+				    </div>
+				    
+					<table class="table table-bordered" style="width: 50%;margin-left: 25%">
+						<tbody id="tbl_emp_roles"></tbody>
+					</table>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="sel_emp_loc">Location: </label>
+				    <div class="col-sm-5">
+				    	<select class="form-control" id="sel_emp_loc"></select>
+				    </div>
+				    <div class="col-sm-3">
+				    	<button class="btn btn-defalut" id="btn_emp_loc">+</button>
+				    </div>
+
+					<table class="table table-bordered" style="width: 50%;margin-left: 25%">
+						<tbody id="tbl_emp_locations"></tbody>
+					</table>
+				</div>
+				<div class="form-group">
+					<button class="btn btn-primary" id="btn_save_emp">Add Employee</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
