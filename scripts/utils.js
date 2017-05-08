@@ -59,11 +59,48 @@ function getUnits(roles, employees) {
 			}
 		}
 
-		var defaultRole = employees[i]['defaultrole'];
-		var unit = {key: generateSectionId(defaultRole, i), label: employees[i]['name']};
+		var defaultRole = parseInt(employees[i]['defaultrole']);
+		var unit = { 
+			key: generateSectionId(defaultRole, i), 
+			label: employees[i]['name'], 
+			photo: employees[i]['photo'],
+			emp_name: employees[i]['name'] 
+		};
 		units[defaultRole + 1]['children'].push(unit);
 	}
 	return units;
+}
+
+function updateUnitLabel(units, shifts, key = "all") {
+	var totalHours = 0;
+	var totalShifts = 0;
+	for (var i = units.length - 1; i >= 0; i--) {
+		var childUnits = units[i]['children'];
+		if (childUnits == undefined)	continue;
+		for (var j = childUnits.length - 1; j >= 0; j--) {
+			var keyOfUnit = key;
+			if ( key === "all" )
+				keyOfUnit = childUnits[j]['key'];
+			else if ( childUnits[j]['key'] != key )
+				continue;
+			var numOfShifts = 0;
+			var sumOfHours = 0;
+			for (var k = 0; k < shifts.length ; k++) {
+				if ( shifts[k]['section_id'] == keyOfUnit ) {
+					numOfShifts++;
+					var startTime = (new Date(shifts[k]['start_date'])).getTime();
+					var endTime = (new Date(shifts[k]['end_date'])).getTime();
+					var hoursDiff = Math.ceil( ( endTime - startTime ) / ( 1000 * 3600 ) );
+					sumOfHours += hoursDiff;
+				}
+			}
+			totalHours += sumOfHours;
+			childUnits[j]['label'] = "<img class='img-emp-avatar' src='./backend/photos/" + childUnits[j]['photo'] + "' />" + childUnits[j]['emp_name'] + "<br>" + sumOfHours + " hours, " + numOfShifts + " shifts";
+		}
+	}
+	if (key === "all") {
+		$('#total_hours').html(totalHours + " hours");
+	}
 }
 
 function getShiftSlots(roles, employees, shifts) {

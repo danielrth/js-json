@@ -59,3 +59,15 @@ html, body{
     top: 13px;
     width: 120px;
 }
+.dhx_cal_footer {
+	position: absolute;
+	bottom: 0;
+	font-size: 20px;
+}
+.img-emp-avatar {
+	width: 30px;
+    height: 30px;
+    left: 0;
+    position: absolute;
+    border-radius: 50%;
+}

@@ -9,7 +9,7 @@ $(document).ready(function(){
 	}
 
 	$.ajax({
-	  	url: "./backend/rota_data.json",
+	  	url: "./backend/data_loader.php",
 	  	type: 'GET'
 	})
 	.done(function(data) {
@@ -23,6 +23,7 @@ $(document).ready(function(){
 		console.log(dhxUnits);
 		dhxSlots = getShiftSlots(roles, employees, shifts);
 		console.log(dhxSlots);
+		updateUnitLabel(dhxUnits, dhxSlots);
 		initScheduler();
 
 		for (var i=0; i<locations.length; i++) {
@@ -52,6 +53,7 @@ $(document).ready(function(){
 		console.log(dhxUnits);
 		dhxSlots = getShiftSlots(roles, employees, shifts);
 		console.log(dhxSlots);
+		updateUnitLabel(dhxUnits, dhxSlots);
 		scheduler.clearAll();
 		initScheduler();
 	});

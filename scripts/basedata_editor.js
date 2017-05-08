@@ -7,7 +7,7 @@ $(document).ready(function(){
 	Load data from backend
 	=========================*/
 	$.ajax({
-	  	url: "./backend/rota_data.json",
+	  	url: "./backend/data_loader.php",
 	  	type: 'GET'
 	})
 	.done(function(data) {
@@ -23,12 +23,16 @@ $(document).ready(function(){
 		console.log(error);
 	});
 
+	/*=========================================
+	Dropdown selector with available css colors
+	==========================================*/
 	$.ajax({
 	  	url: "./backend/csscolors.json",
 	  	type: 'GET'
 	})
 	.done(function(data) {
-		var arrCssColors = JSON.parse(data);
+		// var arrCssColors = JSON.parse(data);
+		var arrCssColors = data;
 		for (var i = 0; i < arrCssColors.length; i++) {
 			$("#mnu_color").append("<li style='background-color:" + arrCssColors[i]['Name'] + "'><a href='#'>"+arrCssColors[i]['Name']+"</a></li>");
 		}
@@ -37,14 +41,11 @@ $(document).ready(function(){
 		console.log(error);
 	});
 
-	/*=========================================
-	Dropdown selector with available css colors
-	==========================================*/
 	$('.dropdown-menu').on( 'click', 'a', function() {
 	    var text = $(this).html();
 	    var htmlText = text + ' <span class="caret"></span>';
-	    $('.dropdown-toggle').html(htmlText);
-	    $('.dropdown-toggle').css('background-color', text);
+	    $('#sel_color').html(htmlText);
+	    $('#sel_color').css('background-color', text);
 	});
 
 	/*===============
@@ -59,8 +60,8 @@ $(document).ready(function(){
 	Save new Role
 	===============*/
 	$('#btn_save_role').on('click', function() {
-		var name = $('#txt_role_name').val();
-		var color = $('.dropdown-toggle').html();
+		var name = $( '#txt_role_name' ).val();
+		var color = $( '#sel_color' ).css( "background-color" );
 		if (!name)	alert ("Role name is required!");
 		if (!color)	alert ("Color of a role is required!");
 		sendDataToServer ( {'req': 'role', 'name': name, 'color': color} );
@@ -122,14 +123,27 @@ function sendDataToServer (data) {
 	    success: function(msg) {
 	    	if (data['req'] == 'emp') {
 				employees.push({
-					'name': $('#txt_emp_name').val(), 
-					'defaultrole': $('#sel_emp_role option:selected').val(),
-					'otherroles': arrEmpRoles,
-					'locations': arrEmpLocations});
+					'name': data['name'], 
+					'defaultrole': data[''],
+					'otherroles': data[''],
+					'locations': data['']});
 				loadDataToTable ('employee', employees, $("#tbl_employees"));
 				$('#tbl_emp_roles').html('');
 				$('#tbl_emp_locations').html('');
 				$('#txt_emp_name').val('');
+	    	}
+	    	if (data['req'] == "loc") {
+	    		$('#sel_emp_loc').html('');
+	    		locations.push( data['name'] );
+	    		loadDataToTable ('location', locations, $("#tbl_locations"));
+	    		$('#txt_loc_name').val('');
+	    	}
+	    	if (data['req'] == "role") {
+	    		$('#sel_emp_role').html('');
+	    		$('#sel_other_role').html('');
+	    		roles.push( {name: data['name'], color: data['color']} );
+	    		loadDataToTable ('role', roles, $("#tbl_roles"));
+	    		$('#txt_role_name').val('');
 	    	}
 	    },
 	});

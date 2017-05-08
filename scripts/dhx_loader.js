@@ -43,7 +43,7 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 		 + format(sd)+" - "+format(ed) + "<br>"
 		 + ev.text + "<br>"
 		 + ( ev.role == undefined ? "" : (ev.role < 0 ? "Open Shift" : roles[ev.role]['name']) )
-		 + "(" + (ev.break || 0) + " min break)</div>"
+		 + " (" + (ev.break || 0) + " min break)</div>"
 }
 
 var dragged_event;
@@ -193,6 +193,7 @@ function save_form() {
 	scheduler.endLightbox(true, document.getElementById("shift_form"));
 }
 function close_form() {
+	// scheduler.matrix.timeline.y_unit = dhxUnits;
 	scheduler.endLightbox(false, document.getElementById("shift_form"));
 }
 
