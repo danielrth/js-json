@@ -74,3 +74,13 @@ html, body{
     z-index: 10000;
     top: 14px;
 }
+.dots_section {
+	/*background-image: url(data/imgs/dots.png);*/
+	background-color: red;
+}
+.dhx_cal_header, .dhx_scale_bar, .dhx_data_table.folder .dhx_matrix_cell, .dhx_matrix_scell.folder {
+	background-color: lightgray;
+}
+.dhx_data_table.folder .dhx_matrix_cell, .dhx_matrix_scell.folder {
+	border-top: 1px solid #BBB;
+}
