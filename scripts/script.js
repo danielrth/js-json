@@ -25,6 +25,7 @@ $(document).ready(function(){
 		console.log(dhxSlots);
 		updateUnitLabel(dhxUnits, dhxSlots);
 		initScheduler();
+		scheduler.config.readonly = true;
 
 		for (var i=0; i<locations.length; i++) {
 			$("#sel_location").append(new Option( locations[i], i));
@@ -38,7 +39,7 @@ $(document).ready(function(){
 	});
 
 	/*=========================
-	Role dropdown change event
+	Role dropdown change event in lightbox
 	==========================*/
 	$('#sel_role').on('change', function() {
   		$('#sel_emp').find('option[value!="-1"]').remove();
@@ -47,7 +48,9 @@ $(document).ready(function(){
   		for (var i=0; i<emps.length; i++)
 			$("#sel_emp").append(new Option( emps[i]['label'], emps[i]['key'] % EmployeeLimit ));
 	});
-
+	/*=========================
+	Location change event
+	==========================*/
 	$('#sel_location').on('change', function() {
 		dhxUnits = getUnits(roles, employees);
 		console.log(dhxUnits);
@@ -57,4 +60,11 @@ $(document).ready(function(){
 		scheduler.clearAll();
 		initScheduler();
 	});
+	/*=========================
+	Read only toggle event
+	==========================*/
+	$('#toggle_readonly').change(function() {
+		console.log($(this).prop('checked'));
+		scheduler.config.readonly = !$(this).prop('checked');
+    })
 });

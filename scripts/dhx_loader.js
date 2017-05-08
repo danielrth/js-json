@@ -9,7 +9,7 @@ function initScheduler() {
 	scheduler.config.details_on_create=true;
 	scheduler.config.details_on_dblclick=true;
 	scheduler.config.xml_date="%Y-%m-%d %H:%i";
-	
+
 	
 	//===============
 	//Configuration
@@ -153,7 +153,7 @@ scheduler.showLightbox = function(id) {
 	if (newRole > -1) {
 		var emps = dhxUnits[newRole+1]['children'];
 		for (var i=0; i<emps.length; i++)
-			$("#sel_emp").append(new Option( emps[i]['label'], emps[i]['key'] % EmployeeLimit ));
+			$("#sel_emp").append(new Option( emps[i]['emp_name'], emps[i]['key'] % EmployeeLimit ));
 		
 	}
 	$("#sel_emp").val(newEmp);
@@ -190,10 +190,11 @@ function save_form() {
 	}
 
 	saveServerShift (ev);
+
+	// scheduler.matrix.timeline.y_unit = dhxUnits;
 	scheduler.endLightbox(true, document.getElementById("shift_form"));
 }
 function close_form() {
-	// scheduler.matrix.timeline.y_unit = dhxUnits;
 	scheduler.endLightbox(false, document.getElementById("shift_form"));
 }
 

@@ -95,11 +95,12 @@ function updateUnitLabel(units, shifts, key = "all") {
 				}
 			}
 			totalHours += sumOfHours;
+			totalShifts += numOfShifts;
 			childUnits[j]['label'] = "<img class='img-emp-avatar' src='./backend/photos/" + childUnits[j]['photo'] + "' />" + childUnits[j]['emp_name'] + "<br>" + sumOfHours + " hours, " + numOfShifts + " shifts";
 		}
 	}
 	if (key === "all") {
-		$('#total_hours').html(totalHours + " hours");
+		$('#total_hours').html(totalHours + " hours, " + totalShifts + " shifts");
 	}
 }
 

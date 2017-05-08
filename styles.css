@@ -24,10 +24,6 @@ html, body{
     color: #222;
     margin-left: 2px;
 }
-.dhx_matrix_line td{
-	/*opacity: 0.1 !important;*/
-	/*background-color: red;*/
-}
 .dhx_event_resize{
 	display: none;
 }
@@ -70,4 +66,11 @@ html, body{
     left: 0;
     position: absolute;
     border-radius: 50%;
+}
+.toggle {
+	width: 100px !important;
+	position: absolute;
+    right: 220px;
+    z-index: 10000;
+    top: 14px;
 }
