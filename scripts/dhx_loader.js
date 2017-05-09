@@ -40,7 +40,7 @@ function initScheduler() {
 var format = scheduler.date.date_to_str("%H:%i");
 scheduler.templates.event_bar_text = function(sd, ed, ev){
 	return "<div class=custom-eventline-content>"
-		 + format(sd)+" - "+format(ed) + "<br>"
+		 + "<span class=custom-event-title>" + format(sd)+" - "+format(ed) + "</span><br>"
 		 + ev.text + "<br>"
 		 + ( ev.role == undefined ? "" : (ev.role < 0 ? "Open Shift" : roles[ev.role]['name']) )
 		 + " (" + (ev.break || 0) + " min break)</div>"

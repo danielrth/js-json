@@ -5,9 +5,22 @@ html, body{
 	overflow:hidden;
 }
 .dhx_cal_header, .dhx_scale_bar {
-	background-color: #969394;
+	background-color: #EDEDED;
 	color: #000;
-}	
+	font-size: 10pt;
+	text-align: left;
+	padding-left: 5px;
+}
+#scheduler_container {
+	padding: 20px;
+	height: 100%;
+	width: 100%;
+}
+.dhx_cal_navline .dhx_cal_date {
+	font-weight: 600;
+	font-size: 18pt;
+	font-family: 'Roboto', sans-serif;
+}
 .one_line{
 	white-space:nowrap;
 	overflow:hidden;
@@ -18,20 +31,43 @@ html, body{
 	height: 54px !important;
 	border-radius: 0;
     background-color: #bbb;
-    border: #888 solid 1px;
-    padding-left: 6px;
+	border: none;
+    padding-left: 5px;
     padding-right: 0px;
     color: #222;
     margin-left: 2px;
 }
+.dhx_matrix_line td{
+	/*opacity: 0.1 !important;*/
+	/*background-color: red;*/
+}
 .dhx_event_resize{
 	display: none;
+}
+.dhx_data_table.folder .dhx_matrix_cell,.dhx_matrix_scell.folder {
+	background-color: #EDEDED;
+}
+/* Resource cell color */
+.dhx_matrix_scell.item {
+	background-color: #F5F9FF;
 }
 .custom-eventline-content {
 	widows: 100%;
 	height: 100%;
 	background-color: #fff;
 	padding-left: 5px;
+}
+.custom-eventline-content:hover {
+	background-color: #f3f3f3;
+}
+.custom-event-title {
+	font-weight:800;
+	font-family: 'Roboto', sans-serif;
+}
+.custom-employee-name {
+	font-weight: 600;
+	font-size: 10pt;
+	font-family: 'Roboto', sans-serif;
 }
 #shift_form {
 	position: absolute;
@@ -73,14 +109,4 @@ html, body{
     right: 220px;
     z-index: 10000;
     top: 14px;
-}
-.dots_section {
-	/*background-image: url(data/imgs/dots.png);*/
-	background-color: red;
-}
-.dhx_cal_header, .dhx_scale_bar, .dhx_data_table.folder .dhx_matrix_cell, .dhx_matrix_scell.folder {
-	background-color: lightgray;
-}
-.dhx_data_table.folder .dhx_matrix_cell, .dhx_matrix_scell.folder {
-	border-top: 1px solid #BBB;
 }
