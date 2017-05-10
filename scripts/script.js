@@ -23,9 +23,8 @@ $(document).ready(function(){
 		console.log(dhxUnits);
 		dhxSlots = getShiftSlots(roles, employees, shifts);
 		console.log(dhxSlots);
-		updateUnitLabel(dhxUnits, dhxSlots);
 		initScheduler();
-		scheduler.config.readonly = true;
+		// scheduler.config.readonly = true;
 
 		for (var i=0; i<locations.length; i++) {
 			$("#sel_location").append(new Option( locations[i], i));
@@ -56,7 +55,6 @@ $(document).ready(function(){
 		console.log(dhxUnits);
 		dhxSlots = getShiftSlots(roles, employees, shifts);
 		console.log(dhxSlots);
-		updateUnitLabel(dhxUnits, dhxSlots);
 		scheduler.clearAll();
 		initScheduler();
 	});
@@ -65,6 +63,11 @@ $(document).ready(function(){
 	==========================*/
 	$('#toggle_readonly').change(function() {
 		console.log($(this).prop('checked'));
-		scheduler.config.readonly = !$(this).prop('checked');
-    })
+		var editable = $(this).prop('checked');
+		scheduler.config.readonly = !editable;
+		if (!editable)
+			$('#btn_save').addClass('disabled');
+		else
+			$('#btn_save').removeClass('disabled');
+    });
 });

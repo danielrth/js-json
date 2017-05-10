@@ -1,3 +1,4 @@
+var modifiedShifts = [];
 function getMonday(d) {
   	d = new Date(d);
   	var day = d.getDay(),
@@ -19,15 +20,16 @@ function saveServerShift(ev) {
 		newShift['role'] = ev.role;
 	}
 
-	$.ajax({
-	    type: 'POST',
-	    url: './backend/edit_shifts.php',
-	    data: { 'data': newShift },
-	    success: function(msg) {
-	      	if (isNew)
-	      		ev.shift_id = msg;
-	    }
-	});
+	modifiedShifts.push(newShift);
+	// $.ajax({
+	//     type: 'POST',
+	//     url: './backend/edit_shifts.php',
+	//     data: { 'data': newShift },
+	//     success: function(msg) {
+	//       	if (isNew)
+	//       		ev.shift_id = msg;
+	//     }
+	// });
 }
 
 function deleteServerShift(shiftId) {
@@ -42,10 +44,11 @@ function deleteServerShift(shiftId) {
 }
 
 function getUnits(roles, employees) {
-	var unitOpenShift = {key: -1, label: "Open Shifts"};
+	var unitOpenShift = {key: -1, label: "<span id='lbl_section_role_-1'>Open Shifts</span>", role_name: "Open Shifts"};
 	var units = [unitOpenShift];
 	for (var i = 0; i < roles.length; i++) {
-		var unit = {key: i, label: roles[i]['name'], open: true, children: []};
+		var id = "lbl_section_role_" + i;
+		var unit = {key: i, label: "<span id='" + id + "'>" + roles[i]['name'] + "</span>", role_name: roles[i]['name'], open: true, children: []};
 		units.push(unit);
 	}
 
@@ -60,15 +63,82 @@ function getUnits(roles, employees) {
 		}
 
 		var defaultRole = parseInt(employees[i]['defaultrole']);
+		var id = generateSectionId(defaultRole, i);
 		var unit = { 
-			key: generateSectionId(defaultRole, i), 
-			label: employees[i]['name'], 
+			key: id, 
+			label: "<span id='lbl_section_emp_"+id+"'>" + employees[i]['name'] + "</span>", 
 			photo: employees[i]['photo'],
 			emp_name: employees[i]['name'] 
 		};
 		units[defaultRole + 1]['children'].push(unit);
 	}
 	return units;
+}
+
+function updateSectionLabels(units) {
+	var minDate = scheduler.getState().min_date;
+	var maxDate = scheduler.getState().max_date;
+	var evs = scheduler.getEvents(minDate,maxDate);
+	if (evs.length == 0)	return;
+
+	var arrDurations = {}, arrNumShifts = {};
+	for (var i = 0; i < evs.length; i++) {
+		var hours = ( evs[i]['end_date'].getTime() - evs[i]['start_date'].getTime() ) / ( 1000 * 3600 );
+		if ( arrDurations[evs[i]['section_id']] == undefined )
+			arrDurations[evs[i]['section_id']] = hours;
+		else
+			arrDurations[evs[i]['section_id']] += hours;
+
+		if ( arrNumShifts[evs[i]['section_id']] == undefined )
+			arrNumShifts[evs[i]['section_id']] = 1;
+		else
+			arrNumShifts[evs[i]['section_id']] += 1;
+	}
+
+	console.log(arrDurations);
+	console.log(arrNumShifts);
+	var totalHours = 0, totalNumShifts = 0;
+	for (var i = 0; i < units.length; i++) {
+		var unitHours = 0, unitShifts = 0;
+		var childUnits = units[i]['children'];
+		if (childUnits == undefined) {
+			if ( units[i]['key'] == -1 ) {
+				unitHours = arrDurations[-1];
+				unitShifts = arrNumShifts[-1];
+			}
+		}
+		else {
+			for (var j = 0; j < childUnits.length; j++) {
+				var hours = arrDurations[childUnits[j]['key']] == undefined ? 0 : arrDurations[childUnits[j]['key']];
+				var numShifts = arrNumShifts[childUnits[j]['key']] == undefined ? 0 : arrNumShifts[childUnits[j]['key']];
+				generateLabelHtml( childUnits[j], hours, numShifts );
+				unitHours += hours;
+				unitShifts += numShifts;
+			}	
+		}
+		generateLabelHtml(units[i], unitHours, unitShifts);
+		totalHours += unitHours;
+		totalNumShifts += unitShifts;
+	}
+	$('#total_hours').html(totalHours + " hours, " + totalNumShifts + " shifts");
+}
+
+function generateLabelHtml(unit, hours, numOfShifts) {
+	if (hours == undefined) hours = 0;
+	if (numOfShifts == undefined) numOfShifts = 0;
+	if ( unit['role_name'] != undefined ) {
+		var label = unit['role_name'] +  " - " 
+					+ hours + " hours, " + numOfShifts + " shifts";
+		$('#lbl_section_role_' + unit['key']).html(label);
+	}
+	else if ( unit['emp_name'] != undefined ) {
+		var label = "<img class='img-emp-avatar' src='./backend/photos/" 
+					+ unit['photo'] + "' /><span class=custom-employee-name>" 
+					+ unit['emp_name'] + "</span><br>" 
+					+ hours + " hours, " 
+					+ numOfShifts + " shifts";
+		$('#lbl_section_emp_' + unit['key']).html(label);				
+	}
 }
 
 function updateUnitLabel(units, shifts, key = "all") {

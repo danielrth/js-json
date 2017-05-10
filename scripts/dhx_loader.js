@@ -46,6 +46,10 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 		 + " (" + (ev.break || 0) + " min break)</div>"
 }
 
+scheduler.attachEvent("onDataRender", function(){
+    updateSectionLabels(dhxUnits);
+});
+
 var dragged_event;
 var roleBeforeDrag, sectionIdBeforeDrag;
 var lastEventMode, lastEventDate = [];
@@ -190,8 +194,6 @@ function save_form() {
 	}
 
 	saveServerShift (ev);
-
-	// scheduler.matrix.timeline.y_unit = dhxUnits;
 	scheduler.endLightbox(true, document.getElementById("shift_form"));
 }
 function close_form() {
