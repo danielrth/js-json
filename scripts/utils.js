@@ -1,54 +1,60 @@
-var modifiedShifts = [];
+var shiftsDiffQueue = [];
+/*=====================================
+Get date of Monday with given date
+======================================*/
 function getMonday(d) {
   	d = new Date(d);
   	var day = d.getDay(),
       	diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
   	return new Date(d.setDate(diff));
 }
-
-function saveServerShift(ev) {
-	var isNew = ev.shift_id == undefined;
-	var newShiftId = ( isNew ? "new" : ev.shift_id );
-	var newShift = {
-		id: newShiftId,
+/*=========================================
+Make shifts modification queue to udpate db
+=========================================*/
+function updateShiftsDiffQueue(ev, reqType) {
+	var reqData = {
+		req: reqType, id: ev.shift_id, 
 		employee: ev.emp, task: ev.text, 
 		start_date: moment(ev.start_date).format('YYYY-MM-DD HH:mm'), 
 		end_date: moment(ev.end_date).format('YYYY-MM-DD HH:mm'), 
-		break: ev.break };
-
+		break: ev.break 
+	};
 	if ( ev.emp == -1 ) {
-		newShift['role'] = ev.role;
+		reqData['role'] = ev.role;
 	}
 
-	modifiedShifts.push(newShift);
-	// $.ajax({
-	//     type: 'POST',
-	//     url: './backend/edit_shifts.php',
-	//     data: { 'data': newShift },
-	//     success: function(msg) {
-	//       	if (isNew)
-	//       		ev.shift_id = msg;
-	//     }
-	// });
+	if (reqType == "update") {
+		reqData['id'] = ev.shift_id;
+		for (var i = shiftsDiffQueue.length - 1; i >= 0; i--) {
+			if ( shiftsDiffQueue[i]['req'] == "update" 
+				&& shiftsDiffQueue[i]['id'] == reqData['id'] )
+				shiftsDiffQueue.splice(i, 1);
+		}
+	}
+
+	shiftsDiffQueue.push(reqData);
 }
 
-function deleteServerShift(shiftId) {
-	$.ajax({
-	    type: 'POST',
-	    url: './backend/edit_shifts.php',
-	    data: { 'data': {delId: shiftId} },
-	    success: function(msg) {
-	    	console.log(msg);
-	    }
-	});
+function deleteFromShiftsDiffQueue(shiftId) {
+	for (var i = shiftsDiffQueue.length - 1; i >= 0; i--) {
+		if ( shiftsDiffQueue[i]['id'] == shiftId )
+			shiftsDiffQueue.splice(i, 1);
+	}
+	shiftsDiffQueue.push( {req: "delete", id:shiftId} );
 }
-
+/*=================================================
+Make units data from base data to draw x-axis items
+=================================================*/
 function getUnits(roles, employees) {
 	var unitOpenShift = {key: -1, label: "<span id='lbl_section_role_-1'>Open Shifts</span>", role_name: "Open Shifts"};
 	var units = [unitOpenShift];
 	for (var i = 0; i < roles.length; i++) {
 		var id = "lbl_section_role_" + i;
-		var unit = {key: i, label: "<span id='" + id + "'>" + roles[i]['name'] + "</span>", role_name: roles[i]['name'], open: true, children: []};
+		var unit = {
+			key: i, 
+			label: "<span id='" + id + "'>" + roles[i]['name'] + "</span>", 
+			role_name: roles[i]['name'], open: true, children: []
+		};
 		units.push(unit);
 	}
 
@@ -74,7 +80,9 @@ function getUnits(roles, employees) {
 	}
 	return units;
 }
-
+/*=================================================
+Show shift summaries on y-axis headers
+=================================================*/
 function updateSectionLabels(units) {
 	var minDate = scheduler.getState().min_date;
 	var maxDate = scheduler.getState().max_date;
@@ -95,8 +103,6 @@ function updateSectionLabels(units) {
 			arrNumShifts[evs[i]['section_id']] += 1;
 	}
 
-	console.log(arrDurations);
-	console.log(arrNumShifts);
 	var totalHours = 0, totalNumShifts = 0;
 	for (var i = 0; i < units.length; i++) {
 		var unitHours = 0, unitShifts = 0;
@@ -140,40 +146,10 @@ function generateLabelHtml(unit, hours, numOfShifts) {
 		$('#lbl_section_emp_' + unit['key']).html(label);				
 	}
 }
-
-function updateUnitLabel(units, shifts, key = "all") {
-	var totalHours = 0;
-	var totalShifts = 0;
-	for (var i = units.length - 1; i >= 0; i--) {
-		var childUnits = units[i]['children'];
-		if (childUnits == undefined)	continue;
-		for (var j = childUnits.length - 1; j >= 0; j--) {
-			var keyOfUnit = key;
-			if ( key === "all" )
-				keyOfUnit = childUnits[j]['key'];
-			else if ( childUnits[j]['key'] != key )
-				continue;
-			var numOfShifts = 0;
-			var sumOfHours = 0;
-			for (var k = 0; k < shifts.length ; k++) {
-				if ( shifts[k]['section_id'] == keyOfUnit ) {
-					numOfShifts++;
-					var startTime = (new Date(shifts[k]['start_date'])).getTime();
-					var endTime = (new Date(shifts[k]['end_date'])).getTime();
-					var hoursDiff = Math.ceil( ( endTime - startTime ) / ( 1000 * 3600 ) );
-					sumOfHours += hoursDiff;
-				}
-			}
-			totalHours += sumOfHours;
-			totalShifts += numOfShifts;
-			childUnits[j]['label'] = "<img class='img-emp-avatar' src='./backend/photos/" + childUnits[j]['photo'] + "' /><span class=custom-employee-name>" + childUnits[j]['emp_name'] + "</span><br>" + sumOfHours + " hours, " + numOfShifts + " shifts";
-		}
-	}
-	if (key === "all") {
-		$('#total_hours').html(totalHours + " hours, " + totalShifts + " shifts");
-	}
-}
-
+/*=================================================
+Make dhx events data from shifts data
+=================================================*/
+var lastShiftId  =  -1;
 function getShiftSlots(roles, employees, shifts) {
 	var shiftSlots = [];
 	for (var i = 0; i < shifts.length; i++) {
@@ -213,11 +189,15 @@ function getShiftSlots(roles, employees, shifts) {
 			break: shifts[i]['break'], 
 			role: role, emp: emp 
 		};
+		if ( shifts[i]['id'] > lastShiftId)
+			lastShiftId = shifts[i]['id'];
 		shiftSlots.push(shiftSlot);
 	}
 	return shiftSlots;
 }
-
+/*==================================
+Generate section ID
+====================================*/
 function generateSectionId( roleId, employeeId ) {
 	/*if emp is open, shift section is open shift*/
 	if ( employeeId == -1 )

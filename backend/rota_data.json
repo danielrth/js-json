@@ -24,6 +24,6 @@
 		{ "id": 6, "employee": 5, "task": "Task E-568", "start_date": "2017-05-10 14:00", "end_date": "2017-05-10 18:00", "break": 0 },
 		{ "id": 7, "employee": 3, "task": "Task F-35687", "start_date": "2017-05-10 13:00", "end_date": "2017-05-10 15:00", "break": 18 },
 		{ "id": 8, "employee": 5, "task": "Task G-365", "start_date": "2017-05-09 14:00", "end_date": "2017-05-09 18:00", "break": 15 },
-		{ "id": 9, "employee": 1, "task": "Task H-8446", "start_date": "2017-05-13 16:00", "end_date": "2017-05-13 20:00", "break": 50 }
+		{ "id": 9, "employee": 1, "task": "Task H-8446", "start_date": "2017-05-06 16:00", "end_date": "2017-05-06 20:00", "break": 50 }
 	]
 }

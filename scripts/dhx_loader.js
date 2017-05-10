@@ -111,8 +111,9 @@ scheduler.attachEvent("onDragEnd", function(){
 	}
 
     ev.emp = ev.section_id == -1 ? -1 : ev.section_id % EmployeeLimit;
-	saveServerShift (ev);
+	updateShiftsDiffQueue(ev, "update");
 });
+
 scheduler.attachEvent("onBeforeTodayDisplayed", function (){
     initScheduler();
     return false;
@@ -193,8 +194,14 @@ function save_form() {
 		ev.color = roles[newRole]['color'];
 	}
 
-	saveServerShift (ev);
 	scheduler.endLightbox(true, document.getElementById("shift_form"));
+
+	var reqType = ( ev.shift_id == undefined ? "new" : "update" );
+	if (reqType == "new") {
+		lastShiftId++;
+		ev['shift_id'] = lastShiftId;
+	}
+	updateShiftsDiffQueue( ev, reqType );
 }
 function close_form() {
 	scheduler.endLightbox(false, document.getElementById("shift_form"));
@@ -203,7 +210,7 @@ function close_form() {
 function delete_event() {
 	var event_id = scheduler.getState().lightbox_id;
 	var ev = scheduler.getEvent(scheduler.getState().lightbox_id);
-	deleteServerShift(ev.shift_id);
+	deleteFromShiftsDiffQueue(ev.shift_id);
 
 	scheduler.endLightbox(false, document.getElementById("shift_form"));
 	scheduler.deleteEvent(event_id);

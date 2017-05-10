@@ -8,6 +8,9 @@ $(document).ready(function(){
 		$("#sel_end_time").append(new Option( text, i));
 	}
 
+	/*======================================
+	Load base data and shifts data from db
+	======================================*/
 	$.ajax({
 	  	url: "./backend/data_loader.php",
 	  	type: 'GET'
@@ -24,7 +27,7 @@ $(document).ready(function(){
 		dhxSlots = getShiftSlots(roles, employees, shifts);
 		console.log(dhxSlots);
 		initScheduler();
-		// scheduler.config.readonly = true;
+		scheduler.config.readonly = true;
 
 		for (var i=0; i<locations.length; i++) {
 			$("#sel_location").append(new Option( locations[i], i));
@@ -52,9 +55,7 @@ $(document).ready(function(){
 	==========================*/
 	$('#sel_location').on('change', function() {
 		dhxUnits = getUnits(roles, employees);
-		console.log(dhxUnits);
 		dhxSlots = getShiftSlots(roles, employees, shifts);
-		console.log(dhxSlots);
 		scheduler.clearAll();
 		initScheduler();
 	});
@@ -62,7 +63,6 @@ $(document).ready(function(){
 	Read only toggle event
 	==========================*/
 	$('#toggle_readonly').change(function() {
-		console.log($(this).prop('checked'));
 		var editable = $(this).prop('checked');
 		scheduler.config.readonly = !editable;
 		if (!editable)
@@ -70,4 +70,21 @@ $(document).ready(function(){
 		else
 			$('#btn_save').removeClass('disabled');
     });
+    /*=========================
+	Save button click event
+	==========================*/
+	$('#btn_save').click(function() {
+		if ( !$('#toggle_readonly').prop('checked') || shiftsDiffQueue.length == 0 )
+			return;
+		console.log(shiftsDiffQueue);
+		$.ajax({
+		    type: 'POST',
+		    url: './backend/edit_shifts.php',
+		    data: { 'data': shiftsDiffQueue },
+		    success: function(msg) {
+		      	if (msg == "OK")
+		      		shiftsDiffQueue = [];
+		    }
+		});
+	})
 });

@@ -106,7 +106,12 @@ html, body{
 .toggle {
 	width: 100px !important;
 	position: absolute;
-    right: 220px;
+    right: 280px;
     z-index: 10000;
     top: 14px;
+}
+#btn_save {
+	position: absolute;
+	top: 14px;
+    right: 220px;
 }
