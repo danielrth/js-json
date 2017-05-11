@@ -9,6 +9,7 @@ function initScheduler() {
 	scheduler.config.details_on_create=true;
 	scheduler.config.details_on_dblclick=true;
 	scheduler.config.xml_date="%Y-%m-%d %H:%i";
+	scheduler.xy.min_event_height = 54;
 
 	
 	//===============
@@ -26,8 +27,10 @@ function initScheduler() {
 		y_property:	"section_id",
 		round_position: true,
 		render: "tree",
-		folder_dy:20,
-		dy:60
+		folder_dy: 25,
+		dy: 60,
+		event_dy: 54,
+		event_min_dy: 55
 	});
 	
 	//===============
@@ -43,8 +46,16 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 		 + "<span class=custom-event-title>" + format(sd)+" - "+format(ed) + "</span><br>"
 		 + ev.text + "<br>"
 		 + ( ev.role == undefined ? "" : (ev.role < 0 ? "Open Shift" : roles[ev.role]['name']) )
-		 + " (" + (ev.break || 0) + " min break)</div>"
+		 + " (" + (ev.break || 0) + " min break)</div>";
 }
+
+scheduler.attachEvent("onEmptyClick", function (date, e){
+       // (e.path)[0].css('background-color', 'lightgray');
+       // e.path[0].innerHtml('sldkfj');
+       e.target.innerHTML = "sldfjsdlf";
+       $(e.target).html('sdfjsdlfk');
+       console.log(e.target);
+});
 
 scheduler.attachEvent("onDataRender", function(){
     updateSectionLabels(dhxUnits);
