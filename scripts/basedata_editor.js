@@ -73,13 +73,13 @@ $(document).ready(function(){
 	$('#btn_emp_loc').on('click', function() {
 		if (arrEmpLocations.indexOf($('#sel_emp_loc option:selected').val()) != -1)
 			return;
-		arrEmpLocations.push( $('#sel_emp_loc option:selected').val() );
+		arrEmpLocations.push( parseInt( $('#sel_emp_loc option:selected').val() ) );
 		$("#tbl_emp_locations").append("<tr><td>" + $('#sel_emp_loc option:selected').text() + "</td></tr>");
 	});
 	$('#btn_emp_other_role').on('click', function() {
 		if (arrEmpRoles.indexOf($('#sel_other_role option:selected').val()) != -1)
 			return;
-		arrEmpRoles.push( $('#sel_other_role option:selected').val() );
+		arrEmpRoles.push( parseInt( $('#sel_other_role option:selected').val() ) );
 		$("#tbl_emp_roles").append("<tr><td>" + $('#sel_other_role option:selected').text() + "</td></tr>");
 	});
 
@@ -92,7 +92,7 @@ $(document).ready(function(){
 		if (sendDataToServer ({
 			'req': 'emp', 
 			'name': name, 
-			'defaultrole': $('#sel_emp_role option:selected').val(),
+			'defaultrole': parseInt( $('#sel_emp_role option:selected').val() ),
 			'otherroles': arrEmpRoles,
 			'locations': arrEmpLocations
 		}) == "OK" ) {

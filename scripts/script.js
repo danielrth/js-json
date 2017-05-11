@@ -48,14 +48,14 @@ $(document).ready(function(){
   		if (this.value == -1)	return;
   		var emps = dhxUnits[parseInt(this.value)+1]['children'];
   		for (var i=0; i<emps.length; i++)
-			$("#sel_emp").append(new Option( emps[i]['label'], emps[i]['key'] % EmployeeLimit ));
+			$("#sel_emp").append(new Option( emps[i]['emp_name'], emps[i]['key'] % EmployeeLimit ));
 	});
 	/*=========================
 	Location change event
 	==========================*/
 	$('#sel_location').on('change', function() {
-		dhxUnits = getUnits(roles, employees);
-		dhxSlots = getShiftSlots(roles, employees, shifts);
+		dhxUnits = getUnits( roles, employees );
+		dhxSlots = getShiftSlots( roles, employees, shifts );
 		scheduler.clearAll();
 		initScheduler();
 	});
@@ -86,5 +86,5 @@ $(document).ready(function(){
 		      		shiftsDiffQueue = [];
 		    }
 		});
-	})
+	});
 });

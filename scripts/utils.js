@@ -87,7 +87,7 @@ function updateSectionLabels(units) {
 	var minDate = scheduler.getState().min_date;
 	var maxDate = scheduler.getState().max_date;
 	var evs = scheduler.getEvents(minDate,maxDate);
-	if (evs.length == 0)	return;
+	// if (evs.length == 0)	return;
 
 	var arrDurations = {}, arrNumShifts = {};
 	for (var i = 0; i < evs.length; i++) {
@@ -109,8 +109,8 @@ function updateSectionLabels(units) {
 		var childUnits = units[i]['children'];
 		if (childUnits == undefined) {
 			if ( units[i]['key'] == -1 ) {
-				unitHours = arrDurations[-1];
-				unitShifts = arrNumShifts[-1];
+				unitHours = arrDurations[-1] == undefined ? 0 : arrDurations[-1];
+				unitShifts = arrNumShifts[-1] == undefined ? 0 : arrNumShifts[-1];
 			}
 		}
 		else {

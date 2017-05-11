@@ -49,15 +49,15 @@ scheduler.templates.event_bar_text = function(sd, ed, ev){
 		 + " (" + (ev.break || 0) + " min break)</div>";
 }
 
-scheduler.attachEvent("onEmptyClick", function (date, e){
-       // (e.path)[0].css('background-color', 'lightgray');
-       // e.path[0].innerHtml('sldkfj');
-       e.target.innerHTML = "sldfjsdlf";
-       $(e.target).html('sdfjsdlfk');
-       console.log(e.target);
+scheduler.attachEvent("onDataRender", function(){
+    updateSectionLabels(dhxUnits);
 });
 
-scheduler.attachEvent("onDataRender", function(){
+scheduler.attachEvent("onBeforeTodayDisplayed", function (){
+    initScheduler();
+    return false;
+});
+scheduler.attachEvent("onSchedulerResize", function(){
     updateSectionLabels(dhxUnits);
 });
 
@@ -123,11 +123,6 @@ scheduler.attachEvent("onDragEnd", function(){
 
     ev.emp = ev.section_id == -1 ? -1 : ev.section_id % EmployeeLimit;
 	updateShiftsDiffQueue(ev, "update");
-});
-
-scheduler.attachEvent("onBeforeTodayDisplayed", function (){
-    initScheduler();
-    return false;
 });
 
 scheduler.showLightbox = function(id) {
